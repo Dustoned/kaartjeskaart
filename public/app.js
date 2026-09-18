@@ -320,10 +320,28 @@ function maakKaart() {
 }
 
 /** Eén cijfer of tijdstip met een icoontje en een bijschrift eronder. */
-function feitHtml(icoon, waarde, label) {
-  return `<div class="feit"><span class="feit-icoon" aria-hidden="true">${icoon}</span>
-    <b>${ontsnap(waarde)}</b><span>${ontsnap(label)}</span></div>`;
+function feitHtml(naam, tekst) {
+  return `<span class="feit">${icoon(naam, 13)}${ontsnap(tekst)}</span>`;
 }
+
+/* Lijniconen uit Lucide, dezelfde set die shadcn gebruikt. Emoji leken
+   handig maar verraden zich meteen: ze hebben elk hun eigen stijl, kleur en
+   regelhoogte, en op Windows rendert de helft als een leeg blokje. Deze
+   tekenen allemaal in dezelfde lijndikte mee met de tekstkleur. */
+const ICONEN = {
+  klok: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  kalender: '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
+  ticket: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+  eten: '<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>',
+  parkeren: '<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+  auto: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+  vink: '<path d="M20 6 9 17l-5-5"/>',
+  pijlRechts: '<path d="m9 18 6-6-6-6"/>',
+  extern: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+};
+
+const icoon = (naam, grootte = 14) =>
+  `<svg class="ic" width="${grootte}" height="${grootte}" viewBox="0 0 24 24" aria-hidden="true">${ICONEN[naam] ?? ''}</svg>`;
 
 /* Korte codes voor de socials. Vijf volledige namen passen nooit naast de
    soort-tag, twee letters wel — en dat blijft eerlijker dan nagetekende
@@ -344,10 +362,9 @@ const socialCode = (platform) =>
   SOCIAL_CODE[platform] ?? platform.slice(0, 2).toUpperCase();
 
 /** Een ja/nee-voorziening. Niets bekend? Dan laten we hem weg. */
-function voorzieningHtml(aan, label) {
+function voorzieningHtml(aan, label, naam) {
   if (aan === null || aan === undefined) return '';
-  return `<span class="voorziening${aan ? '' : ' is-niet'}">
-    <span class="vink" aria-hidden="true">${aan ? '✓' : '✕'}</span>${ontsnap(label)}</span>`;
+  return `<span class="etiket${aan ? '' : ' is-niet'}">${icoon(naam, 12)}${ontsnap(label)}</span>`;
 }
 
 function popupHtml(e) {
@@ -362,36 +379,35 @@ function popupHtml(e) {
   // Soort, VIP-tijd en de socials staan bij elkaar in één rij labels onder
   // de plaatsnaam — allemaal korte etiketten die bij het evenement horen.
   const meta = [];
-  if (e.type) meta.push(`<button type="button" class="pil pil-tag" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
-  if (e.viptijd) meta.push(`<span class="pil tijd">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
-  if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
+  if (e.type) meta.push(`<button type="button" class="etiket etiket-knop" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
+  if (e.viptijd) meta.push(`<span class="etiket">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
+  if (e.geannuleerd) meta.push('<span class="etiket is-af">Geannuleerd</span>');
 
   // De socials zitten in een eigen groepje dat intern niet afbreekt, zodat
   // ze altijd netjes op één regel bij elkaar blijven staan.
   if (org?.socials?.length) {
     const knopjes = org.socials
-      .map((s) => `<a class="pil social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow"
+      .map((s) => `<a class="etiket social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow"
         title="${ontsnap(s.platform)}"><span class="vb">${ontsnap(s.platform)}</span><span aria-hidden="true">${ontsnap(socialCode(s.platform))}</span></a>`)
       .join('');
     meta.push(`<span class="pop-socials">${knopjes}</span>`);
   }
 
-  // Cijfers en tijdstippen in een raster, ja/nee-zaken eronder als vinkjes.
-  // Dat scheelt ruimte en leest sneller dan zes blokjes met "Ja" erin.
+  // Begin- en eindtijd horen bij elkaar, dus staan ze als één bereik. Twee
+  // losse blokjes met elk een eigen bijschrift zeiden niet meer.
   const feiten = [];
-  if (e.tijd) feiten.push(feitHtml('🕐', e.tijd, 'Begintijd'));
-  if (d?.eindtijd) feiten.push(feitHtml('🕓', d.eindtijd, 'Eindtijd'));
-  if (d?.edities) feiten.push(feitHtml('📅', String(d.edities), 'Edities'));
+  if (e.tijd) feiten.push(feitHtml('klok', d?.eindtijd ? `${e.tijd} – ${d.eindtijd}` : `vanaf ${e.tijd}`));
+  if (d?.edities) feiten.push(feitHtml('kalender', `${d.edities}e editie`));
 
   const voorzieningen = [
-    voorzieningHtml(d?.tickets, 'Tickets'),
-    voorzieningHtml(d?.eten, 'Eten & drinken'),
-    voorzieningHtml(d?.parkeren, 'Gratis parkeren'),
+    voorzieningHtml(d?.tickets, 'Tickets', 'ticket'),
+    voorzieningHtml(d?.eten, 'Eten & drinken', 'eten'),
+    voorzieningHtml(d?.parkeren, 'Gratis parkeren', 'parkeren'),
   ].filter(Boolean).join('');
 
   // Alle knoppen op één regel, die afbreekt als er geen ruimte meer is.
   const knoppen = [
-    `<a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Pokeradar</a>`,
+    `<a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Pokeradar${icoon('extern', 13)}</a>`,
   ];
   if (org?.website) {
     knoppen.push(`<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website</a>`);
@@ -405,8 +421,7 @@ function popupHtml(e) {
   // Meteen de schatting tonen; de echte rijtijd schuift er overheen zodra
   // die binnen is (zie de popupopen-afhandeling bij de speld).
   const reis = mijnLocatie
-    ? `<p class="pop-reis" data-reis="${ontsnap(e.id)}">
-         <span class="pop-reis-icoon" aria-hidden="true">🚗</span>
+    ? `<p class="pop-reis" data-reis="${ontsnap(e.id)}">${icoon('auto', 14)}
          <span class="pop-reis-tekst">${reisTekst(reistijden.get(`${mijnLocatie.lat},${mijnLocatie.lon}->${e.lat},${e.lon}`) ?? schatReistijd(km))}</span>
        </p>`
     : '';
@@ -415,26 +430,21 @@ function popupHtml(e) {
     <div class="pop" style="--kleur:${kleur}">
       ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt=""></div>` : ''}
 
-      <div class="pop-kop">
+      <div class="pop-lijf">
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
-        <div class="pop-plaats">
-          <span class="pop-stad">${ontsnap(e.stad)}</span>
-          ${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}
-        </div>
-        ${meta.length ? `<div class="pop-meta">${meta.join('')}</div>` : ''}
+        <p class="pop-plaats">${ontsnap(e.stad)}${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}</p>
+
+        ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
+        ${meta.length || voorzieningen ? `<div class="pop-etiketten">${meta.join('')}${voorzieningen}</div>` : ''}
+        ${d?.beschrijving ? `<details class="pop-tekst"><summary>${icoon('pijlRechts', 12)}Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
       </div>
 
-      ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
-      ${voorzieningen ? `<div class="pop-voorzieningen">${voorzieningen}</div>` : ''}
-      ${d?.beschrijving ? `<details class="pop-tekst"><summary>Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
-
-      <div class="pop-acties">
+      ${reis || knoppen.length ? `<div class="pop-voet">
         ${reis}
         <div class="pop-knoppen">${knoppen.join('')}</div>
-      </div>
-
-      ${e.precisie === 'city' ? '<p class="pop-bron">Speld staat op het centrum van de plaats</p>' : ''}
+        ${e.precisie === 'city' ? '<p class="pop-bron">Speld staat op het centrum van de plaats</p>' : ''}
+      </div>` : ''}
     </div>`;
 }
 

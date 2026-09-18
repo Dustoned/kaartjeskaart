@@ -41,6 +41,21 @@
 
   --kop-h: 58px;
   --paneel-b: 384px;
+
+  /* De kleurenset van shadcn (thema "zinc"), letterlijk overgenomen.
+     Het opvallendste eraan: --sc-primair is bijna-wit in het donker en
+     bijna-zwart in het licht. Geen kleur dus. Kleur is voorbehouden aan
+     dingen die je moet opvallen, en dat is bijna nooit een knop.
+     Voorlopig alleen in gebruik bij het beurskaartje. */
+  --sc-kaart: oklch(0.21 0.006 285.885);
+  --sc-tekst: oklch(0.985 0 0);
+  --sc-zacht: oklch(0.274 0.006 286.033);
+  --sc-zacht-tekst: oklch(0.705 0.015 286.067);
+  --sc-rand: oklch(1 0 0 / 10%);
+  --sc-primair: oklch(0.92 0.004 286.32);
+  --sc-primair-tekst: oklch(0.21 0.006 285.885);
+  --sc-waarschuwing: oklch(0.704 0.191 22.216);
+  --sc-radius: 0.625rem;
 }
 
 :root[data-thema="licht"] {
@@ -72,9 +87,29 @@
   --soort-8: #e34948;
   --soort-0: #7a8699;
   --schaduw: 0 4px 18px rgb(18 28 45 / .12);
+
+  --sc-kaart: oklch(1 0 0);
+  --sc-tekst: oklch(0.141 0.005 285.823);
+  --sc-zacht: oklch(0.967 0.001 286.375);
+  --sc-zacht-tekst: oklch(0.552 0.016 285.938);
+  --sc-rand: oklch(0.92 0.004 286.32);
+  --sc-primair: oklch(0.21 0.006 285.885);
+  --sc-primair-tekst: oklch(0.985 0 0);
+  --sc-waarschuwing: oklch(0.577 0.245 27.325);
 }
 
 * { box-sizing: border-box; }
+
+/* Tekst die alleen voor schermlezers bedoeld is: de volledige naam achter
+   een afkorting of een icoonknop. Wel in de leesvolgorde, niet in beeld. */
+.vb {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 /* Een eigen `display` op een element overschrijft het hidden-attribuut,
    dus die moet hier expliciet weer terug. */
@@ -716,16 +751,18 @@ a { color: inherit; }
 /* ---------- popup ---------- */
 
 .leaflet-popup-content-wrapper {
-  background: var(--vlak);
-  color: var(--tekst);
-  border-radius: 12px;
-  border: 1px solid var(--rand);
-  box-shadow: var(--schaduw);
+  background: var(--sc-kaart);
+  color: var(--sc-tekst);
+  border-radius: var(--sc-radius);
+  border: 1px solid var(--sc-rand);
+  /* Twee zachte schaduwen over elkaar in plaats van één harde: dat is hoe
+     shadcn een kaartje laat zweven zonder dat je de schaduw opmerkt. */
+  box-shadow: 0 1px 3px rgb(0 0 0 / .1), 0 12px 32px -8px rgb(0 0 0 / .35);
   /* De beeldbalk loopt tot de rand, dus die moet op de ronding afgesneden. */
   overflow: hidden;
   padding: 0;
 }
-.leaflet-popup-tip { background: var(--vlak); border: 1px solid var(--rand); }
+.leaflet-popup-tip { background: var(--sc-kaart); border: 1px solid var(--sc-rand); }
 /* De inhoud krijgt zelf geen marge meer: de beeldbalk moet tot de rand van
    het kaartje lopen, dus de witruimte zit per blok binnenin. */
 .leaflet-popup-content { margin: 0; width: 304px !important; max-height: 70vh; overflow-y: auto; }
@@ -742,247 +779,217 @@ a { color: inherit; }
   place-items: center;
   font-size: 17px;
   line-height: 1;
-  color: var(--tekst-zacht);
-  background: color-mix(in srgb, var(--vlak) 82%, transparent);
+  color: var(--sc-zacht-tekst);
+  background: color-mix(in oklab, var(--sc-kaart) 82%, transparent);
   backdrop-filter: blur(4px);
-  box-shadow: 0 0 0 1px var(--rand);
+  box-shadow: 0 0 0 1px var(--sc-rand);
 }
 .leaflet-container a.leaflet-popup-close-button:hover {
-  color: var(--tekst);
-  background: var(--vlak);
+  color: var(--sc-tekst);
+  background: var(--sc-zacht);
 }
+/* ---------------------------------------------------------------
+   Het beurskaartje, opnieuw opgezet in de vormtaal van shadcn.
 
-/* Het kaartje is opgebouwd uit blokken die elk hun eigen witruimte dragen,
-   gescheiden door dunne lijnen: beeld, kop, cijfers, voorzieningen,
-   beschrijving, knoppen. Zo blijft de volgorde logisch, ook als een blok
-   ontbreekt. */
+   Wat er anders is dan hiervoor:
+   - geen emoji meer, maar lijniconen uit Lucide die in dezelfde dikte
+     met de tekstkleur meetekenen;
+   - geen gekleurde etiketten. Alles is neutraal grijs; de enige kleur
+     in het kaartje is de rode rand van een geannuleerde beurs;
+   - de knop is bijna-zwart in plaats van knalrood. Dat is de kern van
+     hoe shadcn eruitziet: kleur zegt "let op", en dat zegt een knop die
+     je uit zichzelf al ziet staan niet;
+   - veel minder doosjes. De feiten stonden in een grijze balk met
+     scheidingslijnen; nu zijn het gewoon regels tekst met een icoontje.
+   --------------------------------------------------------------- */
+
 .pop { display: flex; flex-direction: column; }
+
+.ic {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
 
 .pop-beeld {
   aspect-ratio: 16 / 7;
   overflow: hidden;
-  background: var(--vlak-hoog);
-  border-radius: 11px 11px 0 0;
+  background: var(--sc-zacht);
 }
 .pop-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.pop-kop { padding: 12px 14px 11px; }
+.pop-lijf { padding: 14px 16px 4px; }
 
 .pop-datum {
   display: flex;
   align-items: baseline;
   gap: 7px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--kleur, var(--accent));
-  margin-bottom: 5px;
-}
-.pop-wanneer {
-  color: var(--tekst-flauw);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: .02em;
-  text-transform: none;
-}
-
-.pop-naam {
-  font-size: 17px;
-  font-weight: 680;
-  line-height: 1.25;
-  letter-spacing: -.01em;
-  margin: 0 0 7px;
-  color: var(--tekst);
-}
-
-.pop-plaats { display: flex; flex-direction: column; gap: 1px; margin-bottom: 9px; }
-.pop-stad { font-size: 13.5px; font-weight: 620; color: var(--tekst); }
-.pop-zaal { font-size: 12.5px; color: var(--tekst-zacht); line-height: 1.35; }
-
-.pop-meta { display: flex; gap: 5px; flex-wrap: wrap; }
-
-/* Cijfers en tijdstippen: drie gelijke kolommen, met scheidingslijntjes
-   ertussen in plaats van eromheen — rustiger dan drie losse doosjes. */
-.pop-feiten {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  border-top: 1px solid var(--rand-zacht);
-  border-bottom: 1px solid var(--rand-zacht);
-  background: color-mix(in srgb, var(--vlak-hoog) 55%, transparent);
-}
-.feit {
-  text-align: center;
-  padding: 10px 4px 9px;
-  line-height: 1.2;
-}
-.feit + .feit { border-left: 1px solid var(--rand-zacht); }
-.feit-icoon { display: block; font-size: 15px; margin-bottom: 4px; opacity: .85; }
-.feit b {
-  display: block;
-  font-size: 15px;
-  font-weight: 680;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.01em;
-  color: var(--tekst);
-}
-.feit span:last-child {
-  display: block;
-  font-size: 9.5px;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: var(--tekst-flauw);
-  margin-top: 2px;
+  color: var(--sc-zacht-tekst);
+  margin-bottom: 6px;
+}
+.pop-wanneer { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+.pop-naam {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  margin: 0 0 4px;
+  color: var(--sc-tekst);
 }
 
-/* Ja/nee-voorzieningen als vinkjes: korter dan een blokje met "Ja" erin. */
-.pop-voorzieningen {
+.pop-plaats {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--sc-zacht-tekst);
+}
+.pop-zaal::before { content: " · "; }
+
+/* Feiten als gewone regel tekst met een icoontje ervoor, in plaats van
+   blokjes in een grijze balk. */
+.pop-feiten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 11px;
+  font-size: 13px;
+  color: var(--sc-tekst);
+}
+.feit { display: inline-flex; align-items: center; gap: 6px; }
+.feit .ic { color: var(--sc-zacht-tekst); }
+
+/* Eén rij etiketten: soort, voorzieningen en socials delen dezelfde vorm,
+   want het zijn allemaal korte labels bij dit evenement. */
+.pop-etiketten {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  padding: 10px 14px 0;
+  margin-top: 12px;
 }
-.voorziening {
+
+.etiket {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  padding: 3px 9px 3px 7px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--soort-3) 40%, transparent);
-  background: color-mix(in srgb, var(--soort-3) 13%, transparent);
-  color: var(--tekst);
+  padding: 2.5px 8px;
+  border-radius: calc(var(--sc-radius) - 4px);
+  border: 1px solid transparent;
+  background: var(--sc-zacht);
+  color: var(--sc-tekst);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.45;
   white-space: nowrap;
 }
-.voorziening .vink { font-size: 10px; font-weight: 700; color: var(--soort-3); }
-.voorziening.is-niet {
-  border-color: var(--rand);
-  background: var(--vlak-hoog);
-  color: var(--tekst-flauw);
-}
-.voorziening.is-niet .vink { color: var(--tekst-flauw); }
+.etiket .ic { color: var(--sc-zacht-tekst); }
 
-.pop-tekst { padding: 10px 14px 0; }
+.etiket-knop { font: inherit; font-size: 11.5px; font-weight: 500; cursor: pointer; }
+.etiket-knop:hover { background: color-mix(in oklab, var(--sc-zacht) 70%, var(--sc-tekst)); }
+
+/* Bekend maar afwezig: blijft staan, want "geen gratis parkeren" is ook
+   iets waard als je met de auto komt. Wel gedempt. */
+.etiket.is-niet { background: none; border-color: var(--sc-rand); color: var(--sc-zacht-tekst); }
+.etiket.is-niet .ic { opacity: .55; }
+.etiket.is-niet::after { content: ": nee"; }
+
+/* De enige kleur in het hele kaartje. */
+.etiket.is-af {
+  background: none;
+  border-color: color-mix(in oklab, var(--sc-waarschuwing) 45%, transparent);
+  color: var(--sc-waarschuwing);
+  font-weight: 600;
+}
+
+.social { text-decoration: none; text-transform: uppercase; letter-spacing: .02em; }
+.social:hover { background: color-mix(in oklab, var(--sc-zacht) 70%, var(--sc-tekst)); }
+.pop-socials { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
+
+.pop-tekst { margin-top: 12px; }
 .pop-tekst summary {
-  cursor: pointer;
-  font-size: 11.5px;
-  font-weight: 650;
-  letter-spacing: .02em;
-  color: var(--tekst-zacht);
-  list-style: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--sc-zacht-tekst);
+  list-style: none;
 }
 .pop-tekst summary::-webkit-details-marker { display: none; }
-.pop-tekst summary::before {
-  content: "";
-  width: 0; height: 0;
-  border: 4px solid transparent;
-  border-left-color: var(--tekst-flauw);
-  margin-right: 1px;
-  transition: transform .15s;
-}
-.pop-tekst[open] summary::before { transform: rotate(90deg) translateX(-1px); }
-.pop-tekst summary:hover { color: var(--tekst); }
+.pop-tekst summary .ic { transition: transform .15s; }
+.pop-tekst[open] summary .ic { transform: rotate(90deg); }
+.pop-tekst summary:hover { color: var(--sc-tekst); }
 .pop-tekst > div {
-  margin-top: 7px;
-  font-size: 11.5px;
-  line-height: 1.55;
-  color: var(--tekst-zacht);
-  max-height: 160px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--sc-zacht-tekst);
+  max-height: 170px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 6px;
 }
 
-/* De knoppen staan onderaan bij elkaar: één duidelijke hoofdknop, daaronder
-   hooguit twee bijrollen naast elkaar, en dan pas de socials. */
-.pop-acties { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+/* De voet is door één lijn van de rest gescheiden, niet door een eigen
+   achtergrond. */
+.pop-voet {
+  margin-top: 14px;
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--sc-rand);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-/* De rijtijd staat in het kaartje zelf; de knop ernaast is alleen nog nodig
-   als je daadwerkelijk wilt gaan navigeren. Zolang het een schatting is
-   staat de regel wat ingetogener. */
 .pop-reis {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
-  padding: 7px 10px;
-  border-radius: 9px;
-  background: var(--vlak-hoog);
-  border: 1px solid var(--rand);
-  font-size: 12px;
-  color: var(--tekst-zacht);
+  font-size: 12.5px;
+  color: var(--sc-zacht-tekst);
 }
-.pop-reis-icoon { font-size: 13px; line-height: 1; }
-.pop-reis.is-echt { color: var(--tekst); border-color: color-mix(in srgb, var(--maand) 40%, var(--rand)); }
+.pop-reis .ic { color: var(--sc-zacht-tekst); }
+.pop-reis.is-echt { color: var(--sc-tekst); }
+
+.pop-knoppen { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .pop-knop {
-  display: block;
-  text-align: center;
-  padding: 9px 10px;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 620;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: fit-content;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: calc(var(--sc-radius) - 2px);
   border: 1px solid transparent;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pop-knop-hoofd {
-  background: var(--accent);
-  color: var(--accent-tekst);
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-.pop-knop-hoofd:hover { filter: brightness(1.07); }
-.pop-knop-zacht {
-  background: var(--vlak-hoog);
-  border-color: var(--rand);
-  color: var(--tekst);
-  font-weight: 560;
-}
-.pop-knop-zacht:hover { border-color: var(--tekst-flauw); background: var(--vlak); }
-
-/* De knoppen staan naast elkaar en verdelen de breedte. Past een label niet
-   meer, dan breekt die knop af naar een eigen regel in plaats van de tekst
-   af te kappen. */
-.pop-knoppen { display: flex; flex-wrap: wrap; gap: 6px; }
-/* `min-width: fit-content` zorgt dat een knop nooit smaller wordt dan zijn
-   tekst: past het drietal niet meer op één regel, dan schuift de laatste
-   naar de volgende in plaats van dat het label wordt afgekapt. */
-.pop-knoppen .pop-knop { flex: 1 1 auto; min-width: fit-content; margin: 0; }
-
-/* Socials staan tussen de andere labels, als groepje dat intern niet
-   afbreekt: ook vijf stuks blijven zo netjes op één regel. */
-.pop-socials { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
-.social {
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
-  color: var(--tekst-zacht);
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: .03em;
-  padding: 1.5px 6px;
-  min-width: 26px;
-  text-align: center;
-}
-.social:hover { color: var(--tekst); border-color: var(--tekst-flauw); background: var(--vlak); }
-
-/* Alleen voor schermlezers: de volledige naam achter de afkorting. */
-.vb {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
   white-space: nowrap;
+  transition: background-color .12s, border-color .12s;
 }
+.pop-knop-hoofd { background: var(--sc-primair); color: var(--sc-primair-tekst); }
+.pop-knop-hoofd:hover { background: color-mix(in oklab, var(--sc-primair) 90%, var(--sc-primair-tekst)); }
+.pop-knop-hoofd .ic { opacity: .7; }
+.pop-knop-zacht { border-color: var(--sc-rand); color: var(--sc-tekst); }
+.pop-knop-zacht:hover { background: var(--sc-zacht); }
 
 .pop-bron {
   margin: 0;
-  padding: 0 14px 11px;
-  font-size: 10px;
-  color: var(--tekst-flauw);
+  font-size: 11px;
+  color: var(--sc-zacht-tekst);
   text-align: center;
+  opacity: .8;
 }
 
 .leaflet-control-attribution {

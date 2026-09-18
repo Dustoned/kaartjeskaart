@@ -164,6 +164,55 @@ function afstandTot(e) {
 
 const toonAfstand = (km) => (km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`);
 
+/** "45 min" of "2 u 12". */
+function toonDuur(minuten) {
+  if (minuten < 60) return `${minuten} min`;
+  return `${Math.floor(minuten / 60)} u ${String(minuten % 60).padStart(2, '0')}`;
+}
+
+/**
+ * Ruwe schatting van de rijtijd, puur uit de hemelsbrede afstand. Wordt
+ * meteen getoond zodat er nooit een lege plek staat, en daarna vervangen
+ * door de echte route zodra die binnen is.
+ */
+function schatReistijd(km) {
+  const weg = km * 1.25; // wegen lopen niet rechtdoor
+  const snelheid = weg < 10 ? 35 : weg < 40 ? 62 : 85;
+  return { minuten: Math.max(1, Math.round((weg / snelheid) * 60)), km: weg, geschat: true };
+}
+
+/* Echte rijtijden komen van OSRM, een gratis routeringsdienst zonder
+   sleutel. Het is een demoserver, dus: hooguit één verzoek per geopende
+   popup, het antwoord onthouden, en bij een fout gewoon de schatting laten
+   staan. */
+const reistijden = new Map(); // "lat,lon->lat,lon" -> {minuten, km}
+
+async function haalReistijd(e) {
+  if (!mijnLocatie || e.lat === null) return null;
+  const sleutel = `${mijnLocatie.lat},${mijnLocatie.lon}->${e.lat},${e.lon}`;
+  if (reistijden.has(sleutel)) return reistijden.get(sleutel);
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${mijnLocatie.lon},${mijnLocatie.lat};${e.lon},${e.lat}?overview=false`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) throw new Error(String(res.status));
+    const body = await res.json();
+    const route = body?.routes?.[0];
+    if (!route) throw new Error('geen route');
+    const uitkomst = { minuten: Math.round(route.duration / 60), km: route.distance / 1000, geschat: false };
+    reistijden.set(sleutel, uitkomst);
+    return uitkomst;
+  } catch {
+    reistijden.set(sleutel, null); // niet blijven proberen
+    return null;
+  }
+}
+
+/** De regel met rijtijd en afstand over de weg. */
+function reisTekst({ minuten, km, geschat }) {
+  return `${geschat ? '±&nbsp;' : ''}${toonDuur(minuten)} rijden · ${toonAfstand(km)} over de weg`;
+}
+
 /* ---------- thema ---------- */
 
 function pasThemaToe(thema) {
@@ -247,6 +296,24 @@ function feitHtml(icoon, waarde, label) {
     <b>${ontsnap(waarde)}</b><span>${ontsnap(label)}</span></div>`;
 }
 
+/* Korte codes voor de socials. Vijf volledige namen passen nooit naast de
+   soort-tag, twee letters wel — en dat blijft eerlijker dan nagetekende
+   merklogo's. De volledige naam staat in de tooltip en voor schermlezers. */
+const SOCIAL_CODE = {
+  instagram: 'IG',
+  facebook: 'FB',
+  tiktok: 'TT',
+  whatsapp: 'WA',
+  youtube: 'YT',
+  twitter: 'X',
+  x: 'X',
+  discord: 'DC',
+  linktree: 'LT',
+};
+
+const socialCode = (platform) =>
+  SOCIAL_CODE[platform] ?? platform.slice(0, 2).toUpperCase();
+
 /** Een ja/nee-voorziening. Niets bekend? Dan laten we hem weg. */
 function voorzieningHtml(aan, label) {
   if (aan === null || aan === undefined) return '';
@@ -263,10 +330,22 @@ function popupHtml(e) {
 
   const afbeelding = e.afbeelding ?? d?.afbeelding ?? null;
 
+  // Soort, VIP-tijd en de socials staan bij elkaar in één rij labels onder
+  // de plaatsnaam — allemaal korte etiketten die bij het evenement horen.
   const meta = [];
   if (e.type) meta.push(`<button type="button" class="pil pil-tag" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
   if (e.viptijd) meta.push(`<span class="pil tijd">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
   if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
+
+  // De socials zitten in een eigen groepje dat intern niet afbreekt, zodat
+  // ze altijd netjes op één regel bij elkaar blijven staan.
+  if (org?.socials?.length) {
+    const knopjes = org.socials
+      .map((s) => `<a class="pil social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow"
+        title="${ontsnap(s.platform)}"><span class="vb">${ontsnap(s.platform)}</span><span aria-hidden="true">${ontsnap(socialCode(s.platform))}</span></a>`)
+      .join('');
+    meta.push(`<span class="pop-socials">${knopjes}</span>`);
+  }
 
   // Cijfers en tijdstippen in een raster, ja/nee-zaken eronder als vinkjes.
   // Dat scheelt ruimte en leest sneller dan zes blokjes met "Ja" erin.
@@ -281,21 +360,27 @@ function popupHtml(e) {
     voorzieningHtml(d?.parkeren, 'Gratis parkeren'),
   ].filter(Boolean).join('');
 
-  const socials = (org?.socials ?? [])
-    .map((s) => `<a class="social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow">${ontsnap(s.platform)}</a>`)
-    .join('');
-
-  // De twee bijrollen staan naast elkaar; staat er maar één, dan vult die
-  // de hele regel.
-  const bij = [];
+  // Alle knoppen op één regel, die afbreekt als er geen ruimte meer is.
+  const knoppen = [
+    `<a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Pokeradar</a>`,
+  ];
   if (org?.website) {
-    bij.push(`<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website</a>`);
+    knoppen.push(`<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website</a>`);
   }
   if (mijnLocatie) {
     const bestemming = encodeURIComponent(`${e.zaal ? e.zaal + ', ' : ''}${e.stad}`);
-    bij.push(`<a class="pop-knop pop-knop-zacht" target="_blank" rel="noopener noreferrer"
-      href="https://www.google.com/maps/dir/?api=1&amp;origin=${mijnLocatie.lat},${mijnLocatie.lon}&amp;destination=${bestemming}">Route · ${ontsnap(toonAfstand(km))}</a>`);
+    knoppen.push(`<a class="pop-knop pop-knop-zacht" target="_blank" rel="noopener noreferrer"
+      href="https://www.google.com/maps/dir/?api=1&amp;origin=${mijnLocatie.lat},${mijnLocatie.lon}&amp;destination=${bestemming}">Navigeren</a>`);
   }
+
+  // Meteen de schatting tonen; de echte rijtijd schuift er overheen zodra
+  // die binnen is (zie de popupopen-afhandeling bij de speld).
+  const reis = mijnLocatie
+    ? `<p class="pop-reis" data-reis="${ontsnap(e.id)}">
+         <span class="pop-reis-icoon" aria-hidden="true">🚗</span>
+         <span class="pop-reis-tekst">${reisTekst(reistijden.get(`${mijnLocatie.lat},${mijnLocatie.lon}->${e.lat},${e.lon}`) ?? schatReistijd(km))}</span>
+       </p>`
+    : '';
 
   return `
     <div class="pop" style="--kleur:${kleur}">
@@ -316,9 +401,8 @@ function popupHtml(e) {
       ${d?.beschrijving ? `<details class="pop-tekst"><summary>Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
 
       <div class="pop-acties">
-        <a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Bekijk op pokeradar<span aria-hidden="true"> →</span></a>
-        ${bij.length ? `<div class="pop-bij${bij.length === 1 ? ' is-een' : ''}">${bij.join('')}</div>` : ''}
-        ${socials ? `<div class="socials">${socials}</div>` : ''}
+        ${reis}
+        <div class="pop-knoppen">${knoppen.join('')}</div>
       </div>
 
       ${e.precisie === 'city' ? '<p class="pop-bron">Speld staat op het centrum van de plaats</p>' : ''}
@@ -338,12 +422,25 @@ function maakSpeld(e) {
     title: `${e.naam} — ${e.stad}`,
   });
   marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPanPadding: [24, 24] });
-  marker.on('popupopen', (ev) => {
+  marker.on('popupopen', async (ev) => {
     zetGekozen(e.id, true);
+    const el = ev.popup.getElement();
+
     // Laadt de afbeelding niet, dan de hele balk weghalen: liever geen beeld
     // dan een grijze strook bovenaan het kaartje.
-    const img = ev.popup.getElement()?.querySelector('.pop-beeld img');
+    const img = el?.querySelector('.pop-beeld img');
     img?.addEventListener('error', () => img.closest('.pop-beeld')?.remove(), { once: true });
+
+    // De echte rijtijd opvragen en over de schatting heen zetten. Lukt het
+    // niet, dan blijft de schatting staan.
+    const regel = el?.querySelector(`.pop-reis[data-reis="${CSS.escape(e.id)}"] .pop-reis-tekst`);
+    if (!regel) return;
+    const echt = await haalReistijd(e);
+    // Ondertussen kan de popup alweer gesloten of vervangen zijn.
+    if (echt && regel.isConnected) {
+      regel.innerHTML = reisTekst(echt);
+      regel.closest('.pop-reis')?.classList.add('is-echt');
+    }
   });
   return marker;
 }

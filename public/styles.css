@@ -762,7 +762,25 @@ select#type:hover { color: var(--tekst); }
 
 /* De knoppen staan onderaan bij elkaar: één duidelijke hoofdknop, daaronder
    hooguit twee bijrollen naast elkaar, en dan pas de socials. */
-.pop-acties { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.pop-acties { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+/* De rijtijd staat in het kaartje zelf; de knop ernaast is alleen nog nodig
+   als je daadwerkelijk wilt gaan navigeren. Zolang het een schatting is
+   staat de regel wat ingetogener. */
+.pop-reis {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 9px;
+  background: var(--vlak-hoog);
+  border: 1px solid var(--rand);
+  font-size: 12px;
+  color: var(--tekst-zacht);
+}
+.pop-reis-icoon { font-size: 13px; line-height: 1; }
+.pop-reis.is-echt { color: var(--tekst); border-color: color-mix(in srgb, var(--maand) 40%, var(--rand)); }
 
 .pop-knop {
   display: block;
@@ -791,20 +809,39 @@ select#type:hover { color: var(--tekst); }
 }
 .pop-knop-zacht:hover { border-color: var(--tekst-flauw); background: var(--vlak); }
 
-.pop-bij { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.pop-bij.is-een { grid-template-columns: 1fr; }
+/* De knoppen staan naast elkaar en verdelen de breedte. Past een label niet
+   meer, dan breekt die knop af naar een eigen regel in plaats van de tekst
+   af te kappen. */
+.pop-knoppen { display: flex; flex-wrap: wrap; gap: 6px; }
+/* `min-width: fit-content` zorgt dat een knop nooit smaller wordt dan zijn
+   tekst: past het drietal niet meer op één regel, dan schuift de laatste
+   naar de volgende in plaats van dat het label wordt afgekapt. */
+.pop-knoppen .pop-knop { flex: 1 1 auto; min-width: fit-content; margin: 0; }
 
-.socials { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 1px; }
+/* Socials staan tussen de andere labels, als groepje dat intern niet
+   afbreekt: ook vijf stuks blijven zo netjes op één regel. */
+.pop-socials { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
 .social {
-  font-size: 10.5px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid var(--rand);
-  color: var(--tekst-flauw);
   text-decoration: none;
-  text-transform: capitalize;
+  color: var(--tekst-zacht);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .03em;
+  padding: 1.5px 6px;
+  min-width: 26px;
+  text-align: center;
 }
-.social:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
+.social:hover { color: var(--tekst); border-color: var(--tekst-flauw); background: var(--vlak); }
+
+/* Alleen voor schermlezers: de volledige naam achter de afkorting. */
+.vb {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 .pop-bron {
   margin: 0;

@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { parseAgenda } from './lib/parse.mjs';
 import { vulCacheAan, cacheSleutel } from './lib/geocode.mjs';
+import { publiceerDetails } from './lib/details-publiceren.mjs';
 
 const BRON = 'https://www.pokeradar.nl/evenement';
 const CACHE_PAD = 'data/venues.json';
@@ -107,6 +108,12 @@ if (opKaart.length < verrijkt.length * 0.9) {
 }
 
 mkdirSync('public', { recursive: true });
+
+const gepubliceerd = publiceerDetails(verrijkt);
+if (gepubliceerd) {
+  console.log(`details     ${gepubliceerd.events}/${verrijkt.length} evenementen, ${gepubliceerd.organisatoren} organisatoren`);
+}
+
 const uitvoer = {
   bijgewerkt: new Date().toISOString(),
   bron: BRON,

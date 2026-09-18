@@ -22,6 +22,20 @@
   --week: #ffa62b;
   --maand: #35c1f1;
   --later: #8a97ab;
+
+  /* Kleur per soort evenement. Vaste volgorde, acht vaste plekken — een
+     negende soort krijgt geen verzonnen kleur maar valt terug op grijs.
+     Deze reeks is gecontroleerd op onderscheidbaarheid, ook bij
+     kleurenblindheid, tegen zowel de donkere als de lichte achtergrond. */
+  --soort-1: #3987e5;  /* Beurs */
+  --soort-2: #d95926;  /* Ruildag */
+  --soort-3: #199e70;  /* Toernooi */
+  --soort-4: #c98500;  /* Comic Con */
+  --soort-5: #d55181;  /* (Retro) Games */
+  --soort-6: #008300;  /* Markt */
+  --soort-7: #9085e9;  /* Tour */
+  --soort-8: #e66767;  /* Winkel opening */
+  --soort-0: #8a97ab;  /* onbekend */
   --schaduw: 0 6px 24px rgb(0 0 0 / .45);
   --kaart-tint: 0;
 
@@ -45,10 +59,26 @@
   --week: #d97b06;
   --maand: #0d82b8;
   --later: #7a8699;
+
+  /* Dezelfde reeks, eigen stappen voor de lichte achtergrond — geen
+     automatische omkering maar apart gekozen en gecontroleerd. */
+  --soort-1: #2a78d6;
+  --soort-2: #eb6834;
+  --soort-3: #1baf7a;
+  --soort-4: #eda100;
+  --soort-5: #e87ba4;
+  --soort-6: #008300;
+  --soort-7: #4a3aa7;
+  --soort-8: #e34948;
+  --soort-0: #7a8699;
   --schaduw: 0 4px 18px rgb(18 28 45 / .12);
 }
 
 * { box-sizing: border-box; }
+
+/* Een eigen `display` op een element overschrijft het hidden-attribuut,
+   dus die moet hier expliciet weer terug. */
+[hidden] { display: none !important; }
 
 html, body {
   height: 100%;
@@ -187,6 +217,11 @@ a { color: inherit; }
   z-index: 1100;
 }
 
+/* Zonder `min-width: 0` mag een raster- of flexitem groeien met zijn inhoud
+   mee. De filterbalk werd daardoor breder dan het scherm en de schuifbare
+   rij had niets om te schuiven. */
+.filters, .filterrij { min-width: 0; max-width: 100%; }
+
 .filterrij { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
 .filterrij-fijn { gap: 14px; padding-top: 1px; }
 
@@ -211,6 +246,8 @@ a { color: inherit; }
 }
 
 .segment { display: flex; gap: 6px; }
+/* Alleen op smalle schermen zichtbaar; op het bureaublad staan alle filters open. */
+.meer-knop { display: none; }
 .chip-land { display: inline-flex; align-items: center; gap: 5px; padding-left: 9px; }
 .chip-land:not(.is-actief) { opacity: .55; }
 /* Inline SVG in plaats van vlagemoji: Windows rendert die als lege blokjes. */
@@ -264,6 +301,93 @@ select#type:hover { color: var(--tekst); }
 .schakel input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
 .schakel:hover { color: var(--tekst); }
 
+/* ---------- eigen datumbereik ---------- */
+
+.datumrij { gap: 8px; }
+.datumveld {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tekst-zacht);
+}
+.datumveld input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 8px;
+  border: 1px solid var(--rand);
+  background: var(--vlak-hoog);
+  color: var(--tekst);
+  font: inherit;
+  font-size: 12.5px;
+}
+.datumveld input:focus { outline: none; border-color: var(--accent); }
+
+/* ---------- mijn locatie ---------- */
+
+.chip-locatie { display: inline-flex; align-items: center; gap: 6px; }
+.chip-locatie svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linejoin: round; }
+
+#straal { flex: 1 1 0; }
+
+/* De speld voor je eigen locatie: een blauwe stip met een halo, zoals in
+   navigatie-apps, zodat hij niet te verwarren is met een beurs. */
+.ik {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #2b8cf0;
+  border: 2.5px solid #fff;
+  box-shadow: 0 0 0 5px rgb(43 140 240 / .25), 0 1px 5px rgb(0 0 0 / .4);
+}
+
+.kaartje { position: relative; }
+.kaartje-afstand {
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--tekst-flauw);
+  background: var(--vlak-hoog);
+  border: 1px solid var(--rand);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.kaartje:hover .kaartje-afstand { color: var(--tekst-zacht); }
+.kaartje-naam { padding-right: 52px; }
+
+.kaartje-datum {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .02em;
+  color: var(--kleur, var(--tekst-flauw));
+  margin-bottom: 3px;
+}
+
+/* ---------- klikbare typetags ---------- */
+
+.pil-tag {
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1.5;
+  cursor: pointer;
+  color: var(--tekst-zacht);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.pil-tag:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
+.pil-tag.is-actief {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-tekst);
+  font-weight: 600;
+}
+.pil-icoon { padding: 1.5px 5px; cursor: default; }
+
 .legenda {
   display: flex;
   gap: 11px;
@@ -273,11 +397,31 @@ select#type:hover { color: var(--tekst); }
   padding-top: 2px;
 }
 .legenda-item { display: inline-flex; align-items: center; gap: 4px; }
-.stip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.stip-vandaag { background: var(--vandaag); }
-.stip-week { background: var(--week); }
-.stip-maand { background: var(--maand); }
-.stip-later { background: var(--later); }
+.stip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+
+.kleurlabel { font-size: 12.5px; color: var(--tekst-zacht); }
+.chip-klein { padding: 4px 10px; font-size: 12px; }
+
+/* In de soortmodus is de legenda meteen een filter: klikken op een soort
+   toont alleen die soort. */
+.legenda-knop {
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 7px 2px 5px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--tekst-flauw);
+  cursor: pointer;
+}
+.legenda-knop:hover { color: var(--tekst); background: var(--vlak-hoog); border-color: var(--rand); }
+.legenda-knop.is-actief {
+  color: var(--tekst);
+  background: var(--vlak-hoog);
+  border-color: var(--tekst-flauw);
+  font-weight: 600;
+}
+.legenda-n { opacity: .6; font-variant-numeric: tabular-nums; }
 
 /* ---------- lijst ---------- */
 
@@ -445,7 +589,7 @@ select#type:hover { color: var(--tekst); }
   box-shadow: var(--schaduw);
 }
 .leaflet-popup-tip { background: var(--vlak); border: 1px solid var(--rand); }
-.leaflet-popup-content { margin: 11px 13px 12px; width: 246px !important; }
+.leaflet-popup-content { margin: 11px 13px 12px; width: 274px !important; max-height: 62vh; overflow-y: auto; }
 .leaflet-popup-close-button { color: var(--tekst-flauw) !important; padding: 7px 7px 0 0 !important; }
 .leaflet-popup-close-button:hover { color: var(--tekst) !important; }
 .leaflet-container a.leaflet-popup-close-button { background: none; }
@@ -462,7 +606,58 @@ select#type:hover { color: var(--tekst); }
 .pop-plaats { font-size: 12.5px; color: var(--tekst-zacht); margin-bottom: 8px; line-height: 1.45; }
 .pop-plaats b { color: var(--tekst); }
 .pop-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
-.pop-link {
+
+/* Het blokje met kerngegevens, zoals pokeradar ze onder een evenement toont. */
+.pop-feiten {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 4px;
+  padding: 9px 0;
+  margin-bottom: 9px;
+  border-top: 1px solid var(--rand-zacht);
+  border-bottom: 1px solid var(--rand-zacht);
+}
+.feit { text-align: center; line-height: 1.25; }
+.feit-icoon { display: block; font-size: 15px; margin-bottom: 2px; }
+.feit b { display: block; font-size: 12px; font-weight: 650; }
+.feit span:last-child { display: block; font-size: 9.5px; color: var(--tekst-flauw); }
+
+.pop-tekst { margin-bottom: 9px; }
+.pop-tekst summary {
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--tekst-zacht);
+  list-style: none;
+}
+.pop-tekst summary::-webkit-details-marker { display: none; }
+.pop-tekst summary::before { content: "▸ "; color: var(--tekst-flauw); }
+.pop-tekst[open] summary::before { content: "▾ "; }
+.pop-tekst summary:hover { color: var(--tekst); }
+.pop-tekst > div {
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--tekst-zacht);
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.pop-org { margin-bottom: 7px; }
+.socials { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.social {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--rand);
+  background: var(--vlak-hoog);
+  color: var(--tekst-zacht);
+  text-decoration: none;
+  text-transform: capitalize;
+}
+.social:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
+
+.pop-knop {
   display: block;
   text-align: center;
   padding: 7px;
@@ -472,8 +667,16 @@ select#type:hover { color: var(--tekst); }
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
+  margin-top: 6px;
 }
-.pop-link:hover { filter: brightness(1.08); }
+.pop-knop:hover { filter: brightness(1.08); }
+.pop-knop-zacht {
+  background: var(--vlak-hoog);
+  border: 1px solid var(--rand);
+  color: var(--tekst);
+}
+.pop-knop-zacht:hover { border-color: var(--tekst-flauw); filter: none; }
+
 .pop-bron { font-size: 10.5px; color: var(--tekst-flauw); text-align: center; margin-top: 5px; }
 
 .leaflet-control-attribution {
@@ -499,7 +702,8 @@ select#type:hover { color: var(--tekst); }
      allebei ruimte voor vrij, inclusief de veilige zone op iPhones. */
   :root {
     --paneel-b: 100%;
-    --balk-h: calc(54px + env(safe-area-inset-bottom));
+    --kop-h: 44px;
+    --balk-h: calc(48px + env(safe-area-inset-bottom));
   }
 
   /* Eén kolom, twee rijen: filters bovenaan en daaronder de rij waarin
@@ -522,7 +726,7 @@ select#type:hover { color: var(--tekst); }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+    padding: 5px 9px calc(5px + env(safe-area-inset-bottom));
     background: var(--vlak);
     border-top: 1px solid var(--rand);
     position: fixed;
@@ -530,8 +734,8 @@ select#type:hover { color: var(--tekst); }
     z-index: 1300;
   }
   .mobielknop {
-    padding: 9px;
-    border-radius: 10px;
+    padding: 7px;
+    border-radius: 9px;
     border: 1px solid var(--rand);
     background: var(--vlak-hoog);
     color: var(--tekst-zacht);
@@ -543,10 +747,52 @@ select#type:hover { color: var(--tekst); }
   .mobielknop.is-actief { background: var(--accent); border-color: var(--accent); color: var(--accent-tekst); }
   .mobiel-telling { opacity: .75; font-weight: 500; }
 
-  .kop { padding: 0 10px 0 12px; }
+  /* Op een telefoon telt elke pixel voor de kaart. De kop wordt een smalle
+     balk en van de filters blijft alleen de periodekeuze staan; de rest komt
+     achter "Meer filters" vandaan. */
+  .kop { padding: 0 8px 0 10px; gap: 8px; }
+  .merk { gap: 8px; }
+  .merk-bal { width: 20px; height: 20px; box-shadow: inset 0 0 0 2px var(--vlak), 0 0 0 1px var(--rand); }
+  .merk-bal::before { height: 2px; margin-top: -1px; }
+  .merk-bal::after { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .kop h1 { font-size: 14px; }
   .merk-onder { display: none; }
-  .filters { padding: 10px 11px 9px; }
-  .legenda { display: none; }
+  .teller { font-size: 12px; }
+  .icoonknop { width: 30px; height: 30px; border-radius: 8px; }
+
+  .filters { padding: 7px 9px; gap: 7px; }
+
+  /* De periodeknoppen op één regel die zijwaarts schuift, in plaats van
+     afbreken over twee of drie regels. */
+  .filters > .filterrij:first-child {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 1px;
+  }
+  .filters > .filterrij:first-child::-webkit-scrollbar { display: none; }
+  .filters > .filterrij:first-child .chip { flex: 0 0 auto; padding: 5px 10px; font-size: 12.5px; }
+
+  /* De knop schuift niet mee weg met de periodeknoppen, maar blijft rechts
+     plakken — anders staat hij buiten beeld en vindt niemand hem. */
+  .meer-knop {
+    display: inline-block;
+    position: sticky;
+    right: -1px;
+    background: var(--vlak);
+    border-color: var(--tekst-flauw);
+    color: var(--tekst);
+    box-shadow: -10px 0 10px -5px var(--vlak), -18px 0 10px -10px var(--vlak);
+  }
+  .filters.is-open .meer-knop { background: var(--accent); border-color: var(--accent); color: var(--accent-tekst); }
+
+  .filters:not(.is-open) .filterrij-extra,
+  .filters:not(.is-open) .legenda { display: none; }
+  /* De legenda is in soortmodus ook een filter, dus die blijft staan;
+     wel op één regel met zijwaarts schuiven zodat hij weinig ruimte kost. */
+  .legenda { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .legenda::-webkit-scrollbar { display: none; }
+  .legenda-item { flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

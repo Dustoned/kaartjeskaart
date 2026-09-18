@@ -28,14 +28,56 @@ evenementen op de agenda verandert en daar een mail over stuurt.
 
 | Pad | Wat |
 |---|---|
-| `public/` | de site: `index.html`, `styles.css`, `app.js`, `events.json` |
-| `scripts/refresh.mjs` | haalt op, parseert, geocodeert, schrijft `events.json` |
-| `scripts/lib/parse.mjs` | markdown → evenementen |
+| `public/` | de site: `index.html`, `styles.css`, `app.js`, `events.json`, `details.json` |
+| `scripts/refresh.mjs` | haalt de agenda op, parseert, geocodeert, schrijft `events.json` |
+| `scripts/fetch-details.mjs` | haalt per evenement de detailpagina en per organisator de website op |
+| `scripts/lib/parse.mjs` | markdown van de agenda → evenementen |
+| `scripts/lib/detail-parse.mjs` | markdown van een detailpagina → tijden, voorzieningen, website |
 | `scripts/lib/geocode.mjs` | stad + zaal → coördinaten, via Nominatim |
+| `scripts/lib/details-publiceren.mjs` | snoeit de detailcache tot wat nu op de agenda staat |
 | `scripts/test-parse.mjs` | controleert de parser tegen `sample-index.md` |
 | `data/venues.json` | de geocode-cache, **hoort in git** |
+| `data/details.json` | de detailcache, **hoort in git** |
+| `.raw/` | ruwe markdown per pagina, **niet in git** — om gratis te kunnen herparsen |
 | `monitor.json` | de instellingen van de Firecrawl-monitor |
 | `sample-index.md` | een opgeslagen versie van de bronpagina, als testmateriaal |
+
+## Wat de kaart kan
+
+- **Filteren** op periode (dit weekend, 7 of 30 dagen, alles, of een eigen
+  datumbereik), land, soort en een zoekterm. De soort-tags in de lijst en de
+  legenda zijn knoppen: erop klikken filtert meteen.
+- **Eigen locatie** via de browser. Daarna staat de afstand bij elke beurs, kun
+  je op afstand sorteren of alleen beurzen binnen zoveel kilometer tonen, en
+  zit er een routeknop in elke popup. Je coördinaten blijven op je eigen
+  apparaat; ze gaan alleen naar `localStorage`.
+- **Kleur op soort of op datum**, met een schakelaar. Let op: 212 van de 235
+  evenementen zijn van het soort "Beurs", dus op soort kleuren maakt de kaart
+  grotendeels eenkleurig. Op datum is vaak bruikbaarder.
+- **Per beurs**: begintijd en eindtijd, of er tickets zijn, eten en drinken,
+  gratis parkeren, het aantal edities, de beschrijving, de website van de
+  organisator en zijn socials.
+
+### Twee databestanden, met opzet
+
+`events.json` (~100 KB) bevat alles wat nodig is om de kaart te tekenen en
+wordt meteen geladen. `details.json` is groter en bevat de extra gegevens;
+dat haalt de site er pas bij nádat de spelden er staan. Valt dat tweede
+bestand weg, dan werkt de kaart gewoon, alleen met minder detail per beurs.
+
+### Detailgegevens ophalen
+
+Elke detailpagina kost een credit en verandert daarna vrijwel nooit meer, dus
+ze worden één keer opgehaald en bewaard in `data/details.json`. De dagelijkse
+Action doet er hooguit 30 per run — genoeg voor de paar nieuwe beurzen die er
+per dag bij komen, en een rem voor als de agenda ineens volloopt.
+
+De ruwe markdown blijft lokaal in `.raw/` staan. Verandert de parser, dan kun
+je alles opnieuw verwerken zonder ook maar één credit uit te geven:
+
+```bash
+node scripts/fetch-details.mjs --herparse
+```
 
 ## Lokaal draaien
 
@@ -100,5 +142,17 @@ oranje zodra dat meer dan drie dagen geleden is.
 
 ## Credits
 
-Ongeveer 180 Firecrawl-credits per maand: 30 voor de dagelijkse scrape en
-zo'n 150 voor de monitor. Geocoden via Nominatim is gratis.
+Doorlopend zo'n 180 tot 270 Firecrawl-credits per maand:
+
+| Wat | Per maand |
+|---|---|
+| dagelijkse scrape van de agenda | 30 |
+| monitor met JSON-extractie | ~150 |
+| detailpagina's van nieuwe beurzen | 0–90 (hooguit 30 per dag) |
+
+Eenmalig kostte het vullen van de detailcache zo'n 390 credits. Die hoeft
+nooit meer opgehaald te worden. Geocoden via Nominatim is gratis.
+
+Wordt het krap, dan kan de monitor van ~150 naar 30 door de JSON-extractie te
+vervangen door een gewone markdown-diff — de Action ziet nieuwe beurzen
+namelijk ook zelf, door met de vorige `events.json` in git te vergelijken.

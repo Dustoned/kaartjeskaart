@@ -9,7 +9,7 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ff5a4e'/><path d='M4 50h92' stroke='%230f1216' stroke-width='9'/><circle cx='50' cy='50' r='15' fill='%230f1216'/><circle cx='50' cy='50' r='8' fill='%23fff'/></svg>">
 
-<link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+<link rel="preconnect" href="https://services.arcgisonline.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css" integrity="sha512-ENrTWqddXrLJsQS2A86QmvA17PkJ0GVm1bqj5aTgpeMAfDKN2+SIOLpKG8R/6KkimnhTb+VW5qqUHB/r1zaRgg==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="styles.css">
@@ -44,16 +44,23 @@
         <button type="button" class="chip" data-periode="7">7 dagen</button>
         <button type="button" class="chip is-actief" data-periode="30">30 dagen</button>
         <button type="button" class="chip" data-periode="alles">Alles</button>
+        <button type="button" class="chip" data-periode="eigen" aria-expanded="false" aria-controls="datumrij">Datum…</button>
+        <button type="button" class="chip meer-knop" id="meerKnop" aria-expanded="false">Meer filters</button>
       </div>
 
-      <div class="filterrij">
+      <div class="filterrij datumrij" id="datumrij" hidden>
+        <label class="datumveld">van <input type="date" id="datumVan" aria-label="Vanaf datum"></label>
+        <label class="datumveld">t/m <input type="date" id="datumTot" aria-label="Tot en met datum"></label>
+      </div>
+
+      <div class="filterrij filterrij-extra">
         <div class="zoekveld">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
           <input type="search" id="zoek" placeholder="Zoek op plaats, zaal of naam" autocomplete="off" aria-label="Zoeken">
         </div>
       </div>
 
-      <div class="filterrij">
+      <div class="filterrij filterrij-extra">
         <div class="segment" role="group" aria-label="Land">
           <button type="button" class="chip chip-land is-actief" data-land="NL">
             <svg class="vlag" viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="6" fill="#21468B"/><rect width="9" height="4" fill="#fff"/><rect width="9" height="2" fill="#AE1C28"/></svg>NL
@@ -67,17 +74,35 @@
         </select>
       </div>
 
-      <div class="filterrij filterrij-fijn">
-        <label class="schakel"><input type="checkbox" id="inBeeld"> <span>Alleen in beeld</span></label>
+      <div class="filterrij filterrij-extra">
+        <button type="button" class="chip chip-locatie" id="locatieKnop">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          <span id="locatieLabel">Mijn locatie</span>
+        </button>
+        <select id="straal" aria-label="Maximale afstand" hidden>
+          <option value="">elke afstand</option>
+          <option value="25">binnen 25 km</option>
+          <option value="50">binnen 50 km</option>
+          <option value="100">binnen 100 km</option>
+          <option value="200">binnen 200 km</option>
+        </select>
+        <button type="button" class="chip" id="sorteerKnop" hidden aria-pressed="false">Dichtstbij eerst</button>
+      </div>
+
+      <div class="filterrij filterrij-fijn filterrij-extra">
+        <label class="schakel"><input type="checkbox" id="inBeeld" checked> <span>Alleen in beeld</span></label>
         <label class="schakel"><input type="checkbox" id="toonGeannuleerd"> <span>Toon geannuleerd</span></label>
       </div>
 
-      <div class="legenda" aria-label="Betekenis van de kleuren">
-        <span class="legenda-item"><i class="stip stip-vandaag"></i>vandaag</span>
-        <span class="legenda-item"><i class="stip stip-week"></i>≤&nbsp;7&nbsp;dgn</span>
-        <span class="legenda-item"><i class="stip stip-maand"></i>≤&nbsp;30&nbsp;dgn</span>
-        <span class="legenda-item"><i class="stip stip-later"></i>later</span>
+      <div class="filterrij filterrij-fijn filterrij-extra">
+        <span class="kleurlabel">Kleur op</span>
+        <div class="segment" role="group" aria-label="Waar de kleur van de spelden op slaat">
+          <button type="button" class="chip chip-klein is-actief" data-kleur="soort">Soort</button>
+          <button type="button" class="chip chip-klein" data-kleur="datum">Datum</button>
+        </div>
       </div>
+
+      <div class="legenda" id="legenda" aria-label="Betekenis van de kleuren"></div>
   </div>
 
   <aside class="paneel" id="paneel">

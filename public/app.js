@@ -43,6 +43,32 @@ function urgentie(dagen) {
   return 'later';
 }
 
+/* Vaste plek per soort. De volgorde ligt vast en wordt nooit doorgeschoven:
+   verdwijnt een soort uit het filter, dan houden de andere hun kleur. Een
+   soort die hier niet in staat krijgt grijs in plaats van een nieuwe kleur. */
+const SOORT_SLOT = {
+  'Beurs': 1,
+  'Ruildag': 2,
+  'Toernooi': 3,
+  'Comic Con': 4,
+  '(Retro) Games': 5,
+  'Markt': 6,
+  'Tour': 7,
+  'Winkel opening': 8,
+};
+
+let kleurModus = 'soort'; // 'soort' of 'datum'
+
+/** Welke kleurnaam hoort bij dit evenement, gegeven de gekozen modus. */
+function niveauVan(e) {
+  if (e.geannuleerd) return kleurModus === 'soort' ? 'soort-0' : 'later';
+  if (kleurModus === 'soort') return `soort-${SOORT_SLOT[e.type] ?? 0}`;
+  return urgentie(dagenTot(e.datum));
+}
+
+/** Dringendheid voor de kleur van een tros; alleen zinvol in datummodus. */
+const RANG = { vandaag: 0, week: 1, maand: 2, later: 3 };
+
 /* De themakleuren staan in CSS-variabelen, maar ze uitlezen kost een
    herberekening van de stijl. Bij 235 spelden loont het om ze één keer
    per thema op te halen. */
@@ -50,7 +76,9 @@ let kleurCache = {};
 function ververKleuren() {
   const stijl = getComputedStyle(document.documentElement);
   kleurCache = {};
-  for (const niveau of ['vandaag', 'week', 'maand', 'later', 'accent']) {
+  const namen = ['vandaag', 'week', 'maand', 'later', 'accent'];
+  for (let i = 0; i <= 8; i++) namen.push(`soort-${i}`);
+  for (const niveau of namen) {
     kleurCache[niveau] = stijl.getPropertyValue(`--${niveau}`).trim() || '#8a97ab';
   }
 }
@@ -94,20 +122,47 @@ const ontsnap = (s) =>
 
 const filters = {
   periode: '30',
+  van: null,   // eigen datumbereik, als periode === 'eigen'
+  tot: null,
   landen: new Set(['NL', 'BE']),
   type: '',
   zoek: '',
-  inBeeld: false,
+  straal: null, // km vanaf mijn locatie
+  inBeeld: true,   // standaard aan: de lijst toont wat je op de kaart ziet
   toonGeannuleerd: false,
 };
 
 let alleEvents = [];
 let zichtbaar = [];
 let gekozenId = null;
+let details = null;       // extra gegevens, worden na het eerste tekenen geladen
+let mijnLocatie = null;   // {lat, lon}
+let mijnSpeld = null;
+let sorteerOpAfstand = false;
 let kaart;
 let tegellaag;
 let clusters;
 const spelden = new Map(); // id -> marker
+
+/* ---------- afstand ---------- */
+
+/** Hemelsbrede afstand in kilometers tussen twee punten. */
+function afstandKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+/** Afstand van mijn locatie tot een evenement, of null als ik niet weet waar ik ben. */
+function afstandTot(e) {
+  if (!mijnLocatie || e.lat === null) return null;
+  return afstandKm(mijnLocatie.lat, mijnLocatie.lon, e.lat, e.lon);
+}
+
+const toonAfstand = (km) => (km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`);
 
 /* ---------- thema ---------- */
 
@@ -133,7 +188,12 @@ function maakKaart() {
     center: [51.85, 4.9],
     zoom: 7,
     zoomControl: true,
-    preferCanvas: true,
+    // Verder uitzoomen dan 6 heeft geen zin voor een Benelux-kaart, en het
+    // zorgt voor grijze banden boven en onder zodra de wereldkaart smaller
+    // wordt dan het venster. De grenzen houden je bovendien in de buurt.
+    minZoom: 6,
+    maxBounds: L.latLngBounds([44.5, -11], [59.5, 21]),
+    maxBoundsViscosity: 0.7,
     worldCopyJump: false,
   });
 
@@ -144,6 +204,7 @@ function maakKaart() {
     // zodat je wel verder kunt inzoomen op een speld.
     maxNativeZoom: TEGEL_MAXZOOM,
     maxZoom: 18,
+    noWrap: true,
   }).addTo(kaart);
 
   clusters = L.markerClusterGroup({
@@ -153,11 +214,17 @@ function maakKaart() {
     disableClusteringAtZoom: 13,
     chunkedLoading: true,
     iconCreateFunction(cluster) {
-      // De kleur van een tros volgt het meest dringende evenement erin.
-      const rang = { vandaag: 0, week: 1, maand: 2, later: 3 };
-      let beste = 'later';
-      for (const m of cluster.getAllChildMarkers()) {
-        if (rang[m.options.niveau] < rang[beste]) beste = m.options.niveau;
+      const kinderen = cluster.getAllChildMarkers();
+      let beste;
+      if (kleurModus === 'datum') {
+        // Op datum telt het meest dringende evenement in de tros.
+        beste = 'later';
+        for (const m of kinderen) if (RANG[m.options.niveau] < RANG[beste]) beste = m.options.niveau;
+      } else {
+        // Op soort telt wat er het meeste in zit.
+        const telling = new Map();
+        for (const m of kinderen) telling.set(m.options.niveau, (telling.get(m.options.niveau) ?? 0) + 1);
+        beste = [...telling.entries()].sort((a, b) => b[1] - a[1])[0][0];
       }
       const n = cluster.getChildCount();
       const grootte = n < 10 ? 34 : n < 50 ? 40 : 46;
@@ -174,13 +241,41 @@ function maakKaart() {
   kaart.on('popupclose', () => { zetGekozen(null, false); });
 }
 
+/** Het icoontje-met-label-blokje zoals pokeradar het onder een evenement zet. */
+function feitHtml(icoon, waarde, label) {
+  return `<div class="feit"><span class="feit-icoon" aria-hidden="true">${icoon}</span>
+    <b>${ontsnap(waarde)}</b><span>${ontsnap(label)}</span></div>`;
+}
+
 function popupHtml(e) {
   const dagen = dagenTot(e.datum);
-  const kleur = kleurVan(e.geannuleerd ? 'later' : urgentie(dagen));
+  const kleur = kleurVan(niveauVan(e));
+  const d = details?.events?.[e.id];
+  const org = details?.organisatoren?.[`${e.naam}|${e.stad}`];
+  const km = afstandTot(e);
+
   const meta = [];
-  if (e.tijd) meta.push(`<span class="pil tijd">${ontsnap(e.tijd)}${e.viptijd ? ` · VIP ${ontsnap(e.viptijd)}` : ''}</span>`);
-  if (e.type) meta.push(`<span class="pil">${ontsnap(e.type)}</span>`);
+  if (e.type) meta.push(`<button type="button" class="pil pil-tag" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
+  if (e.viptijd) meta.push(`<span class="pil tijd">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
   if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
+
+  // De kerngegevens van de detailpagina.
+  const feiten = [];
+  if (e.tijd) feiten.push(feitHtml('🕐', `${e.tijd} uur`, 'Begintijd'));
+  if (d?.eindtijd) feiten.push(feitHtml('🕓', `${d.eindtijd} uur`, 'Eindtijd'));
+  if (d?.tickets !== null && d?.tickets !== undefined) feiten.push(feitHtml('🎟️', d.tickets ? 'Ja' : 'Nee', 'Tickets'));
+  if (d?.eten !== null && d?.eten !== undefined) feiten.push(feitHtml('🍟', d.eten ? 'Ja' : 'Nee', 'Eten & drinken'));
+  if (d?.parkeren !== null && d?.parkeren !== undefined) feiten.push(feitHtml('🅿️', d.parkeren ? 'Ja' : 'Nee', 'Gratis parkeren'));
+  if (d?.edities) feiten.push(feitHtml('📅', String(d.edities), 'Edities totaal'));
+
+  const socials = (org?.socials ?? [])
+    .map((s) => `<a class="social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow">${ontsnap(s.platform)}</a>`)
+    .join('');
+
+  const route = mijnLocatie
+    ? `<a class="pop-knop pop-knop-zacht" target="_blank" rel="noopener noreferrer"
+         href="https://www.google.com/maps/dir/?api=1&amp;origin=${mijnLocatie.lat},${mijnLocatie.lon}&amp;destination=${encodeURIComponent(`${e.zaal ? e.zaal + ', ' : ''}${e.stad}`)}">Route &middot; ${ontsnap(toonAfstand(km))}</a>`
+    : '';
 
   return `
     <div style="--kleur:${kleur}">
@@ -188,13 +283,20 @@ function popupHtml(e) {
       <p class="pop-naam">${ontsnap(e.naam)}</p>
       <div class="pop-plaats"><b>${ontsnap(e.stad)}</b>${e.zaal ? `<br>${ontsnap(e.zaal)}` : ''}</div>
       ${meta.length ? `<div class="pop-meta">${meta.join('')}</div>` : ''}
-      <a class="pop-link" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Bekijk op pokeradar &rarr;</a>
+      ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
+      ${d?.beschrijving ? `<details class="pop-tekst"><summary>Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
+      ${org?.website || socials ? `<div class="pop-org">
+        ${org?.website ? `<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website van de organisator</a>` : ''}
+        ${socials ? `<div class="socials">${socials}</div>` : ''}
+      </div>` : ''}
+      ${route}
+      <a class="pop-knop" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Bekijk op pokeradar &rarr;</a>
       ${e.precisie === 'city' ? '<div class="pop-bron">speld staat op het centrum van de plaats</div>' : ''}
     </div>`;
 }
 
 function maakSpeld(e) {
-  const niveau = e.geannuleerd ? 'later' : urgentie(dagenTot(e.datum));
+  const niveau = niveauVan(e);
   const marker = L.marker([e.lat, e.lon], {
     niveau,
     icon: L.divIcon({
@@ -223,12 +325,23 @@ function pasFiltersToe() {
     if (filters.type && e.type !== filters.type) return false;
 
     const dagen = dagenTot(e.datum);
-    if (dagen < 0) return false;
+    // Bij een eigen datumbereik mag je ook terugkijken; anders tonen we
+    // alleen wat nog komt.
+    if (filters.periode !== 'eigen' && dagen < 0) return false;
     if (filters.periode === '7' && dagen > 7) return false;
     if (filters.periode === '30' && dagen > 30) return false;
     if (filters.periode === 'weekend') {
       const d = naarDatum(e.datum);
       if (d < weekend.van || d > weekend.tot) return false;
+    }
+    if (filters.periode === 'eigen') {
+      if (filters.van && e.datum < filters.van) return false;
+      if (filters.tot && e.datum > filters.tot) return false;
+    }
+
+    if (filters.straal) {
+      const km = afstandTot(e);
+      if (km === null || km > filters.straal) return false;
     }
 
     if (zoek) {
@@ -237,6 +350,12 @@ function pasFiltersToe() {
     }
     return true;
   });
+
+  if (sorteerOpAfstand && mijnLocatie) {
+    zichtbaar.sort((a, b) => (afstandTot(a) ?? Infinity) - (afstandTot(b) ?? Infinity));
+  } else {
+    zichtbaar.sort((a, b) => a.datum.localeCompare(b.datum) || (a.tijd ?? '').localeCompare(b.tijd ?? ''));
+  }
 }
 
 /* ---------- tekenen ---------- */
@@ -268,36 +387,102 @@ function tekenLijst() {
     return;
   }
 
-  const perDag = new Map();
-  for (const e of rijen) {
-    if (!perDag.has(e.datum)) perDag.set(e.datum, []);
-    perDag.get(e.datum).push(e);
-  }
+  /** Eén rij in de lijst. `metDatum` zet de datum in de rij zelf, voor als
+      er niet per dag gegroepeerd wordt. */
+  const kaartjeHtml = (e, dagen, metDatum = false) => {
+    const niveau = niveauVan(e);
+    const d = details?.events?.[e.id];
+    const km = afstandTot(e);
+
+    const meta = [];
+    if (e.tijd) {
+      const tot = d?.eindtijd ? `–${d.eindtijd}` : '';
+      meta.push(`<span class="pil tijd">${ontsnap(e.tijd + tot)}</span>`);
+    }
+    // Het type is een knop: erop klikken filtert er meteen op.
+    if (e.type) {
+      const aan = filters.type === e.type;
+      meta.push(`<button type="button" class="pil pil-tag${aan ? ' is-actief' : ''}" data-tag="${ontsnap(e.type)}"
+        title="${aan ? 'Filter op dit soort uitzetten' : `Alleen ${ontsnap(e.type)} tonen`}">${ontsnap(e.type)}</button>`);
+    }
+    if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
+    if (d) {
+      if (d.tickets) meta.push('<span class="pil pil-icoon" title="Tickets beschikbaar">🎟️</span>');
+      if (d.eten) meta.push('<span class="pil pil-icoon" title="Eten &amp; drinken aanwezig">🍟</span>');
+      if (d.parkeren) meta.push('<span class="pil pil-icoon" title="Gratis parkeren">🅿️</span>');
+    }
+
+    return `
+      <article class="kaartje${e.geannuleerd ? ' is-af' : ''}${e.id === gekozenId ? ' is-gekozen' : ''}"
+               style="--kleur:${kleurVan(niveau)}" data-id="${ontsnap(e.id)}" tabindex="0" role="button">
+        <div class="kaartje-lijf">
+          ${metDatum ? `<div class="kaartje-datum">${ontsnap(datumLabel(e.datum))}</div>` : ''}
+          <p class="kaartje-naam">${ontsnap(e.naam)}</p>
+          <div class="kaartje-plaats"><b>${ontsnap(e.stad)}</b>${e.zaal ? ` · ${ontsnap(e.zaal)}` : ''}</div>
+          ${meta.length ? `<div class="kaartje-meta">${meta.join('')}</div>` : ''}
+        </div>
+        ${km !== null ? `<span class="kaartje-afstand">${ontsnap(toonAfstand(km))}</span>` : ''}
+      </article>`;
+  };
 
   const stukken = [];
-  for (const [datum, groep] of perDag) {
-    const dagen = dagenTot(datum);
-    stukken.push(
-      `<div class="datumkop"><span>${ontsnap(datumLabel(datum))}</span><span class="relatief">${ontsnap(relatief(dagen))}</span></div>`,
-    );
-    for (const e of groep) {
-      const niveau = e.geannuleerd ? 'later' : urgentie(dagen);
-      const meta = [];
-      if (e.tijd) meta.push(`<span class="pil tijd">${ontsnap(e.tijd)}</span>`);
-      if (e.type) meta.push(`<span class="pil">${ontsnap(e.type)}</span>`);
-      if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
-      stukken.push(`
-        <article class="kaartje${e.geannuleerd ? ' is-af' : ''}${e.id === gekozenId ? ' is-gekozen' : ''}"
-                 style="--kleur:${kleurVan(niveau)}" data-id="${ontsnap(e.id)}" tabindex="0" role="button">
-          <div class="kaartje-lijf">
-            <p class="kaartje-naam">${ontsnap(e.naam)}</p>
-            <div class="kaartje-plaats"><b>${ontsnap(e.stad)}</b>${e.zaal ? ` · ${ontsnap(e.zaal)}` : ''}</div>
-            ${meta.length ? `<div class="kaartje-meta">${meta.join('')}</div>` : ''}
-          </div>
-        </article>`);
+
+  if (sorteerOpAfstand && mijnLocatie) {
+    // Op afstand gesorteerd is groeperen per dag zinloos; dan zet de datum
+    // bij elke rij zelf.
+    stukken.push('<div class="datumkop"><span>Dichtstbij eerst</span><span class="relatief">vanaf jouw locatie</span></div>');
+    for (const e of rijen) stukken.push(kaartjeHtml(e, dagenTot(e.datum), true));
+  } else {
+    const perDag = new Map();
+    for (const e of rijen) {
+      if (!perDag.has(e.datum)) perDag.set(e.datum, []);
+      perDag.get(e.datum).push(e);
+    }
+    for (const [datum, groep] of perDag) {
+      const dagen = dagenTot(datum);
+      stukken.push(
+        `<div class="datumkop"><span>${ontsnap(datumLabel(datum))}</span><span class="relatief">${ontsnap(relatief(dagen))}</span></div>`,
+      );
+      for (const e of groep) stukken.push(kaartjeHtml(e, dagen));
     }
   }
+
   lijst.innerHTML = stukken.join('');
+}
+
+/**
+ * Bouwt de legenda op bij de gekozen kleurmodus. Bij kleur-op-soort tonen we
+ * alleen de soorten die daadwerkelijk in de data voorkomen, met hoeveel het
+ * er zijn — dan zie je meteen dat het grootste deel gewoon "Beurs" is.
+ */
+function tekenLegenda() {
+  const el = $('#legenda');
+  if (kleurModus === 'datum') {
+    el.innerHTML = [
+      ['vandaag', 'vandaag'],
+      ['week', '≤&nbsp;7&nbsp;dgn'],
+      ['maand', '≤&nbsp;30&nbsp;dgn'],
+      ['later', 'later'],
+    ]
+      .map(([n, label]) => `<span class="legenda-item"><i class="stip" style="background:${kleurVan(n)}"></i>${label}</span>`)
+      .join('');
+    return;
+  }
+
+  const telling = new Map();
+  for (const e of alleEvents) {
+    if (!e.type) continue;
+    telling.set(e.type, (telling.get(e.type) ?? 0) + 1);
+  }
+  el.innerHTML = [...telling.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, n]) => {
+      const aan = filters.type === type;
+      return `<button type="button" class="legenda-item legenda-knop${aan ? ' is-actief' : ''}" data-tag="${ontsnap(type)}">
+        <i class="stip" style="background:${kleurVan(`soort-${SOORT_SLOT[type] ?? 0}`)}"></i>${ontsnap(type)} <span class="legenda-n">${n}</span>
+      </button>`;
+    })
+    .join('');
 }
 
 function tekenTeller() {
@@ -311,6 +496,7 @@ function tekenAlles() {
   tekenSpelden();
   tekenLijst();
   tekenTeller();
+  tekenLegenda();
 }
 
 /**
@@ -357,6 +543,72 @@ function springNaar(id) {
   });
 }
 
+/* ---------- mijn locatie ---------- */
+
+/**
+ * Zet de eigen locatie en werkt de bediening bij. De coördinaten blijven
+ * op dit apparaat: ze gaan alleen naar localStorage, zodat je na een
+ * herlaadbeurt niet opnieuw toestemming hoeft te geven.
+ */
+function zetLocatie(lat, lon, { bewaren = true } = {}) {
+  mijnLocatie = { lat, lon };
+  if (bewaren) {
+    try { localStorage.setItem('kaartjeskaart-locatie', JSON.stringify(mijnLocatie)); } catch { /* privémodus */ }
+  }
+
+  if (mijnSpeld) mijnSpeld.remove();
+  mijnSpeld = L.marker([lat, lon], {
+    icon: L.divIcon({ className: 'ik-wrap', html: '<div class="ik"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }),
+    zIndexOffset: 1000,
+    keyboard: false,
+    title: 'Jouw locatie',
+  }).addTo(kaart).bindPopup('Jouw locatie');
+
+  $('#locatieLabel').textContent = 'Locatie aan';
+  $('#locatieKnop').classList.add('is-actief');
+  $('#straal').hidden = false;
+  $('#sorteerKnop').hidden = false;
+}
+
+function vraagLocatie() {
+  if (mijnLocatie) {
+    // Nog eens klikken zet hem weer uit.
+    mijnLocatie = null;
+    sorteerOpAfstand = false;
+    filters.straal = null;
+    mijnSpeld?.remove();
+    mijnSpeld = null;
+    try { localStorage.removeItem('kaartjeskaart-locatie'); } catch { /* privémodus */ }
+    $('#locatieLabel').textContent = 'Mijn locatie';
+    $('#locatieKnop').classList.remove('is-actief');
+    $('#straal').hidden = true;
+    $('#straal').value = '';
+    $('#sorteerKnop').hidden = true;
+    $('#sorteerKnop').classList.remove('is-actief');
+    $('#sorteerKnop').setAttribute('aria-pressed', 'false');
+    naFilter();
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    $('#locatieLabel').textContent = 'Niet beschikbaar';
+    return;
+  }
+  $('#locatieLabel').textContent = 'Zoeken…';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      zetLocatie(pos.coords.latitude, pos.coords.longitude);
+      tekenAlles();
+      kaart.flyTo([pos.coords.latitude, pos.coords.longitude], 9, { duration: 0.6 });
+    },
+    (err) => {
+      $('#locatieLabel').textContent = err.code === err.PERMISSION_DENIED ? 'Geweigerd' : 'Mislukt';
+      setTimeout(() => { $('#locatieLabel').textContent = 'Mijn locatie'; }, 3000);
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+  );
+}
+
 /* ---------- mobiele weergave ---------- */
 
 function zetWeergave(welke) {
@@ -374,9 +626,69 @@ function koppelBediening() {
     knop.addEventListener('click', () => {
       filters.periode = knop.dataset.periode;
       for (const k of document.querySelectorAll('[data-periode]')) k.classList.toggle('is-actief', k === knop);
+
+      const eigen = filters.periode === 'eigen';
+      $('#datumrij').hidden = !eigen;
+      knop.setAttribute('aria-expanded', String(eigen));
+      // Op mobiel zitten de datumvelden in het ingeklapte deel; die openen
+      // we dan meteen, anders klik je op "Datum…" en gebeurt er niets zichtbaars.
+      if (eigen && !$('.filters').classList.contains('is-open')) $('#meerKnop').click();
+      // Bij de eerste keer openen meteen een zinnig bereik voorstellen:
+      // vandaag tot drie maanden vooruit.
+      if (eigen && !filters.van && !filters.tot) {
+        const vandaag = vandaagOm0();
+        const over3m = new Date(vandaag);
+        over3m.setMonth(over3m.getMonth() + 3);
+        const alsTekst = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        filters.van = $('#datumVan').value = alsTekst(vandaag);
+        filters.tot = $('#datumTot').value = alsTekst(over3m);
+      }
       naFilter();
     });
   }
+
+  for (const veld of ['datumVan', 'datumTot']) {
+    $(`#${veld}`).addEventListener('change', (ev) => {
+      filters[veld === 'datumVan' ? 'van' : 'tot'] = ev.target.value || null;
+      if (filters.periode !== 'eigen') {
+        document.querySelector('[data-periode="eigen"]').click();
+      } else {
+        naFilter();
+      }
+    });
+  }
+
+  for (const knop of document.querySelectorAll('[data-kleur]')) {
+    knop.addEventListener('click', () => {
+      kleurModus = knop.dataset.kleur;
+      for (const k of document.querySelectorAll('[data-kleur]')) k.classList.toggle('is-actief', k === knop);
+      try { localStorage.setItem('kaartjeskaart-kleur', kleurModus); } catch { /* privémodus */ }
+      tekenAlles();
+    });
+  }
+
+  // Op een telefoon staat maar een deel van de filters uitgeklapt, zodat de
+  // kaart niet in de verdrukking komt. Deze knop klapt de rest open.
+  $('#meerKnop').addEventListener('click', (ev) => {
+    const open = $('.filters').classList.toggle('is-open');
+    ev.currentTarget.setAttribute('aria-expanded', String(open));
+    ev.currentTarget.textContent = open ? 'Minder filters' : 'Meer filters';
+    requestAnimationFrame(() => kaart.invalidateSize());
+  });
+
+  $('#locatieKnop').addEventListener('click', vraagLocatie);
+
+  $('#straal').addEventListener('change', (ev) => {
+    filters.straal = ev.target.value ? Number(ev.target.value) : null;
+    naFilter();
+  });
+
+  $('#sorteerKnop').addEventListener('click', (ev) => {
+    sorteerOpAfstand = !sorteerOpAfstand;
+    ev.currentTarget.classList.toggle('is-actief', sorteerOpAfstand);
+    ev.currentTarget.setAttribute('aria-pressed', String(sorteerOpAfstand));
+    tekenAlles();
+  });
 
   for (const knop of document.querySelectorAll('[data-land]')) {
     knop.addEventListener('click', () => {
@@ -410,8 +722,26 @@ function koppelBediening() {
     b.addEventListener('click', () => zetWeergave(b.dataset.weergave));
   }
 
+  /** Op een typetag klikken filtert erop; nog eens klikken zet hem uit. */
+  function wisselTag(tag) {
+    filters.type = filters.type === tag ? '' : tag;
+    $('#type').value = filters.type;
+    naFilter();
+  }
+
+  // Tags staan in de lijst, in de popups op de kaart en in de legenda, dus
+  // vangen we ze op documentniveau af — vóór de klik op het kaartje zelf.
+  document.addEventListener('click', (ev) => {
+    const tag = ev.target.closest('[data-tag]');
+    if (!tag) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    wisselTag(tag.dataset.tag);
+  }, true);
+
   const lijst = $('#lijst');
   lijst.addEventListener('click', (ev) => {
+    if (ev.target.closest('.pil-tag')) return;
     const kaartje = ev.target.closest('.kaartje');
     if (kaartje) springNaar(kaartje.dataset.id);
   });
@@ -425,6 +755,13 @@ function koppelBediening() {
 async function start() {
   document.documentElement.dataset.thema = beginThema();
   ververKleuren();
+  try {
+    const bewaard = localStorage.getItem('kaartjeskaart-kleur');
+    if (bewaard === 'datum' || bewaard === 'soort') kleurModus = bewaard;
+  } catch { /* privémodus */ }
+  for (const k of document.querySelectorAll('[data-kleur]')) {
+    k.classList.toggle('is-actief', k.dataset.kleur === kleurModus);
+  }
   maakKaart();
   koppelBediening();
 
@@ -454,12 +791,31 @@ async function start() {
     $('#bijgewerkt').style.color = versWeg > 3 ? 'var(--week)' : '';
   }
 
+  // Een eerder toegestane locatie meteen terugzetten, zonder opnieuw te vragen.
+  try {
+    const bewaard = JSON.parse(localStorage.getItem('kaartjeskaart-locatie') ?? 'null');
+    if (bewaard?.lat && bewaard?.lon) zetLocatie(bewaard.lat, bewaard.lon, { bewaren: false });
+  } catch { /* privémodus of rommel in de opslag */ }
+
   tekenAlles();
 
   // Beeld op de gefilterde spelden zetten, maar niet te ver inzoomen.
   if (zichtbaar.length) {
     kaart.fitBounds(L.latLngBounds(zichtbaar.map((e) => [e.lat, e.lon])).pad(0.12), { maxZoom: 11 });
   }
+
+  // De extra gegevens (eindtijd, tickets, website, socials) zijn een stuk
+  // groter en niet nodig om de kaart te tonen. Die halen we er daarom pas
+  // achteraf bij; tot die tijd werkt alles gewoon, alleen met minder detail.
+  try {
+    const res = await fetch(`details.json?v=${encodeURIComponent(data.bijgewerkt ?? '')}`);
+    if (res.ok) {
+      details = await res.json();
+      tekenLijst();
+      // Een open popup opnieuw opbouwen, zodat de nieuwe gegevens er meteen in staan.
+      if (gekozenId) spelden.get(gekozenId)?.getPopup()?.update();
+    }
+  } catch { /* geen details is geen ramp */ }
 }
 
 start();

@@ -222,36 +222,153 @@ a { color: inherit; }
    rij had niets om te schuiven. */
 .filters, .filterrij { min-width: 0; max-width: 100%; }
 
-.filterrij { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
-.filterrij-fijn { gap: 14px; padding-top: 1px; }
+.filterrij { display: flex; gap: 7px; align-items: center; }
 
-.chip {
-  padding: 6px 11px;
-  border-radius: 999px;
+/* ---------- keuzebalk ----------
+   Eén omhulsel met knoppen erin, waarvan de gekozene omhoog komt te liggen.
+   Dat leest als "kies er één uit deze rij", terwijl losse gekleurde pillen
+   er allemaal even hard om aandacht schreeuwen. Geen accentkleur hier: die
+   is voorbehouden aan dingen die echt aanstaan of ingedrukt moeten worden. */
+
+.keuzebalk {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  border: 1px solid var(--rand);
+  background: var(--vlak-hoog);
+  flex: 0 0 auto;
+}
+.keuzebalk > button {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--tekst-zacht);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.keuzebalk > button:hover { color: var(--tekst); }
+.keuzebalk > button.is-actief {
+  background: var(--vlak);
+  color: var(--tekst);
+  font-weight: 620;
+  box-shadow: 0 1px 3px rgb(0 0 0 / .3), 0 0 0 1px var(--rand-zacht);
+}
+:root[data-thema="licht"] .keuzebalk > button.is-actief { box-shadow: 0 1px 3px rgb(18 28 45 / .14); }
+
+/* De periodebalk vult de volle breedte; de rest past zich aan zijn inhoud aan. */
+.filters > .keuzebalk { display: flex; }
+.keuze-icoon { flex: 0 0 auto !important; display: grid; place-items: center; padding: 5px 8px !important; }
+.keuze-icoon svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+
+.keuzebalk-klein > button { font-size: 11.5px; padding: 3px 8px; }
+
+/* Land is geen keuze-uit-één maar twee losse schakelaars; ze delen de
+   vormtaal, maar een uitgezette staat dimt in plaats van te verdwijnen. */
+.keuzebalk-land > button { display: inline-flex; align-items: center; gap: 5px; }
+.keuzebalk-land > button:not(.is-actief) { opacity: .45; }
+/* Inline SVG in plaats van vlagemoji: Windows rendert die als lege blokjes. */
+.vlag { width: 14px; height: 9.5px; border-radius: 1.5px; flex: 0 0 auto; box-shadow: 0 0 0 1px rgb(0 0 0 / .18); }
+
+/* ---------- keuzeveld ----------
+   Een uitklaplijst hoort er niet uit te zien als een kaal besturingselement
+   van het besturingssysteem tussen de rest. */
+
+.keuzeveld { position: relative; flex: 1 1 0; min-width: 0; }
+.keuzeveld select {
+  width: 100%;
+  height: 32px;
+  appearance: none;
+  padding: 0 26px 0 10px;
+  border-radius: 9px;
+  border: 1px solid var(--rand);
+  background: var(--vlak-hoog);
+  color: var(--tekst);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.keuzeveld select:hover { border-color: var(--tekst-flauw); }
+.keuzeveld::after {
+  content: "";
+  position: absolute;
+  right: 10px; top: 50%;
+  margin-top: -2px;
+  width: 0; height: 0;
+  border: 4px solid transparent;
+  border-top-color: var(--tekst-flauw);
+  pointer-events: none;
+}
+/* Staat er iets anders dan "alles", dan is dat een actief filter: dát mag
+   je zien. */
+.keuzeveld select.is-gefilterd {
+  border-color: var(--accent);
+  color: var(--tekst);
+  font-weight: 600;
+}
+.keuzeveld-klein { flex: 0 0 auto; width: 112px; }
+.keuzeveld-klein select { height: 27px; font-size: 11.5px; padding: 0 22px 0 8px; }
+.keuzeveld-klein::after { right: 8px; }
+
+/* ---------- vierkante knoppen ---------- */
+
+.vierkantknop {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 9px;
   border: 1px solid var(--rand);
   background: var(--vlak-hoog);
   color: var(--tekst-zacht);
-  font: inherit;
-  font-size: 13px;
   cursor: pointer;
-  white-space: nowrap;
   transition: background .12s, color .12s, border-color .12s;
 }
-.chip:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
-.chip.is-actief {
+.vierkantknop:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
+.vierkantknop svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Accent alleen hier: dit staat écht aan en heeft gevolgen voor de hele lijst. */
+.vierkantknop.is-actief {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-tekst);
-  font-weight: 560;
 }
+.vierkantknop.is-bezig { opacity: .6; }
+.vierkantknop.is-mis { border-color: var(--vandaag); color: var(--vandaag); }
 
-.segment { display: flex; gap: 6px; }
-/* Alleen op smalle schermen zichtbaar; op het bureaublad staan alle filters open. */
-.meer-knop { display: none; }
-.chip-land { display: inline-flex; align-items: center; gap: 5px; padding-left: 9px; }
-.chip-land:not(.is-actief) { opacity: .55; }
-/* Inline SVG in plaats van vlagemoji: Windows rendert die als lege blokjes. */
-.vlag { width: 15px; height: 10px; border-radius: 1.5px; flex: 0 0 auto; box-shadow: 0 0 0 1px rgb(0 0 0 / .18); }
+/* ---------- instellingen ---------- */
+
+.instellingen {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--rand);
+  background: var(--vlak-hoog);
+}
+.instelling {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 28px;
+  font-size: 12px;
+  color: var(--tekst-zacht);
+}
+.instelling-vink { cursor: pointer; justify-content: flex-start; gap: 8px; }
+.instelling-vink:hover { color: var(--tekst); }
+.instelling input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px; height: 15px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
 
 .zoekveld {
   flex: 1 1 100%;
@@ -274,45 +391,19 @@ a { color: inherit; }
 .zoekveld input::placeholder { color: var(--tekst-flauw); }
 .zoekveld input::-webkit-search-cancel-button { filter: grayscale(1) opacity(.5); }
 
-select#type {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 32px;
-  padding: 0 8px;
-  border-radius: 9px;
-  border: 1px solid var(--rand);
-  background: var(--vlak-hoog);
-  color: var(--tekst-zacht);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-select#type:hover { color: var(--tekst); }
-
-.schakel {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--tekst-zacht);
-  cursor: pointer;
-  user-select: none;
-}
-.schakel input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
-.schakel:hover { color: var(--tekst); }
-
 /* ---------- eigen datumbereik ---------- */
 
-.datumrij { gap: 8px; }
+.datumrij { display: flex; gap: 7px; }
 .datumveld {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: var(--tekst-zacht);
+  font-size: 11.5px;
+  color: var(--tekst-flauw);
 }
+.datumveld > span { flex: 0 0 auto; }
 .datumveld input {
   flex: 1;
   min-width: 0;
@@ -328,11 +419,6 @@ select#type:hover { color: var(--tekst); }
 .datumveld input:focus { outline: none; border-color: var(--accent); }
 
 /* ---------- mijn locatie ---------- */
-
-.chip-locatie { display: inline-flex; align-items: center; gap: 6px; }
-.chip-locatie svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linejoin: round; }
-
-#straal { flex: 1 1 0; }
 
 /* De speld voor je eigen locatie: een blauwe stip met een halo, zoals in
    navigatie-apps, zodat hij niet te verwarren is met een beurs. */
@@ -388,19 +474,23 @@ select#type:hover { color: var(--tekst); }
 }
 .pil-icoon { padding: 1.5px 5px; cursor: default; }
 
+/* De legenda is geen besturing maar een sleutel, dus staat hij onderaan,
+   afgescheiden door een lijntje en in een kleinere letter. In soortmodus is
+   hij wél aanklikbaar, en dat mag je aan de knopvorm zien. */
 .legenda {
   display: flex;
-  gap: 11px;
+  gap: 4px;
   flex-wrap: wrap;
+  align-items: center;
   font-size: 11px;
   color: var(--tekst-flauw);
-  padding-top: 2px;
+  padding-top: 8px;
+  margin-top: 1px;
+  border-top: 1px solid var(--rand-zacht);
 }
+.legenda:empty { display: none; }
 .legenda-item { display: inline-flex; align-items: center; gap: 4px; }
 .stip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
-
-.kleurlabel { font-size: 12.5px; color: var(--tekst-zacht); }
-.chip-klein { padding: 4px 10px; font-size: 12px; }
 
 /* In de soortmodus is de legenda meteen een filter: klikken op een soort
    toont alleen die soort. */
@@ -934,37 +1024,16 @@ select#type:hover { color: var(--tekst); }
 
   .filters { padding: 7px 9px; gap: 7px; }
 
-  /* De periodeknoppen op één regel die zijwaarts schuift, in plaats van
-     afbreken over twee of drie regels. */
-  .filters > .filterrij:first-child {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 1px;
-  }
-  .filters > .filterrij:first-child::-webkit-scrollbar { display: none; }
-  .filters > .filterrij:first-child .chip { flex: 0 0 auto; padding: 5px 10px; font-size: 12.5px; }
+  /* Alles iets krapper, zodat de drie rijen samen niet meer ruimte kosten
+     dan nodig. */
+  .zoekveld { height: 32px; }
+  .keuzebalk > button { padding: 5px 7px; font-size: 12px; }
+  .keuzeveld select { height: 30px; }
+  .vierkantknop { width: 30px; height: 30px; }
 
-  /* De knop schuift niet mee weg met de periodeknoppen, maar blijft rechts
-     plakken — anders staat hij buiten beeld en vindt niemand hem. */
-  .meer-knop {
-    display: inline-block;
-    position: sticky;
-    right: -1px;
-    background: var(--vlak);
-    border-color: var(--tekst-flauw);
-    color: var(--tekst);
-    box-shadow: -10px 0 10px -5px var(--vlak), -18px 0 10px -10px var(--vlak);
-  }
-  .filters.is-open .meer-knop { background: var(--accent); border-color: var(--accent); color: var(--accent-tekst); }
-
-  .filters:not(.is-open) .filterrij-extra,
-  .filters:not(.is-open) .legenda { display: none; }
-  /* De legenda is in soortmodus ook een filter, dus die blijft staan;
-     wel op één regel met zijwaarts schuiven zodat hij weinig ruimte kost. */
-  .legenda { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-  .legenda::-webkit-scrollbar { display: none; }
-  .legenda-item { flex: 0 0 auto; }
+  /* De kleurensleutel kost een hele regel en het filteren op soort kan hier
+     ook via de uitklaplijst, dus die laten we op een telefoon weg. */
+  .legenda { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

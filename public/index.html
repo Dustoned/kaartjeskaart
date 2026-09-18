@@ -39,69 +39,92 @@
        kaart en lijst, en de filters moeten in allebei bereikbaar blijven. -->
   <div class="filters">
 
-      <div class="filterrij" role="group" aria-label="Periode">
-        <button type="button" class="chip" data-periode="weekend">Dit weekend</button>
-        <button type="button" class="chip" data-periode="7">7 dagen</button>
-        <button type="button" class="chip is-actief" data-periode="30">30 dagen</button>
-        <button type="button" class="chip" data-periode="alles">Alles</button>
-        <button type="button" class="chip" data-periode="eigen" aria-expanded="false" aria-controls="datumrij">Datum…</button>
-        <button type="button" class="chip meer-knop" id="meerKnop" aria-expanded="false">Meer filters</button>
+      <!-- 1. Zoeken -->
+      <div class="zoekveld">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+        <input type="search" id="zoek" placeholder="Zoek op plaats, zaal of naam" autocomplete="off" aria-label="Zoeken">
       </div>
 
-      <div class="filterrij datumrij" id="datumrij" hidden>
-        <label class="datumveld">van <input type="date" id="datumVan" aria-label="Vanaf datum"></label>
-        <label class="datumveld">t/m <input type="date" id="datumTot" aria-label="Tot en met datum"></label>
+      <!-- 2. Wanneer — één aaneengesloten keuzebalk, want je kiest er precies één -->
+      <div class="keuzebalk" role="group" aria-label="Periode">
+        <button type="button" data-periode="weekend">Weekend</button>
+        <button type="button" data-periode="7">7 dgn</button>
+        <button type="button" class="is-actief" data-periode="30">30 dgn</button>
+        <button type="button" data-periode="alles">Alles</button>
+        <button type="button" class="keuze-icoon" data-periode="eigen" aria-expanded="false" aria-controls="datumrij" title="Eigen datumbereik" aria-label="Eigen datumbereik">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>
+        </button>
       </div>
 
-      <div class="filterrij filterrij-extra">
-        <div class="zoekveld">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
-          <input type="search" id="zoek" placeholder="Zoek op plaats, zaal of naam" autocomplete="off" aria-label="Zoeken">
+      <div class="datumrij" id="datumrij" hidden>
+        <label class="datumveld"><span>van</span><input type="date" id="datumVan" aria-label="Vanaf datum"></label>
+        <label class="datumveld"><span>t/m</span><input type="date" id="datumTot" aria-label="Tot en met datum"></label>
+      </div>
+
+      <!-- 3. Wat en waar -->
+      <div class="filterrij">
+        <div class="keuzeveld">
+          <select id="type" aria-label="Soort evenement">
+            <option value="">Alle soorten</option>
+          </select>
         </div>
-      </div>
 
-      <div class="filterrij filterrij-extra">
-        <div class="segment" role="group" aria-label="Land">
-          <button type="button" class="chip chip-land is-actief" data-land="NL">
+        <div class="keuzebalk keuzebalk-land" role="group" aria-label="Land">
+          <button type="button" class="is-actief" data-land="NL" aria-pressed="true">
             <svg class="vlag" viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="6" fill="#21468B"/><rect width="9" height="4" fill="#fff"/><rect width="9" height="2" fill="#AE1C28"/></svg>NL
           </button>
-          <button type="button" class="chip chip-land is-actief" data-land="BE">
+          <button type="button" class="is-actief" data-land="BE" aria-pressed="true">
             <svg class="vlag" viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="6" fill="#ED2939"/><rect width="6" height="6" fill="#FAE042"/><rect width="3" height="6" fill="#000"/></svg>BE
           </button>
         </div>
-        <select id="type" aria-label="Soort evenement">
-          <option value="">Alle soorten</option>
-        </select>
-      </div>
 
-      <div class="filterrij filterrij-extra">
-        <button type="button" class="chip chip-locatie" id="locatieKnop">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
-          <span id="locatieLabel">Mijn locatie</span>
+        <button type="button" class="vierkantknop" id="locatieKnop" title="Mijn locatie gebruiken" aria-label="Mijn locatie gebruiken">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          <span class="vb" id="locatieLabel">Mijn locatie</span>
         </button>
-        <select id="straal" aria-label="Maximale afstand" hidden>
-          <option value="">elke afstand</option>
-          <option value="25">binnen 25 km</option>
-          <option value="50">binnen 50 km</option>
-          <option value="100">binnen 100 km</option>
-          <option value="200">binnen 200 km</option>
-        </select>
-        <button type="button" class="chip" id="sorteerKnop" hidden aria-pressed="false">Dichtstbij eerst</button>
+
+        <button type="button" class="vierkantknop" id="meerKnop" aria-expanded="false" aria-controls="instellingen" title="Weergave-instellingen" aria-label="Weergave-instellingen">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+        </button>
       </div>
 
-      <div class="filterrij filterrij-fijn filterrij-extra">
-        <label class="schakel"><input type="checkbox" id="inBeeld" checked> <span>Alleen in beeld</span></label>
-        <label class="schakel"><input type="checkbox" id="toonGeannuleerd"> <span>Toon geannuleerd</span></label>
-      </div>
+      <!-- 4. Weergave-instellingen, uitklapbaar: dingen die je één keer zet -->
+      <div class="instellingen" id="instellingen" hidden>
+        <label class="instelling" id="straalRij" hidden>
+          <span>Alleen binnen</span>
+          <div class="keuzeveld keuzeveld-klein">
+            <select id="straal" aria-label="Maximale afstand">
+              <option value="">elke afstand</option>
+              <option value="25">25 km</option>
+              <option value="50">50 km</option>
+              <option value="100">100 km</option>
+              <option value="200">200 km</option>
+            </select>
+          </div>
+        </label>
 
-      <div class="filterrij filterrij-fijn filterrij-extra">
-        <span class="kleurlabel">Kleur op</span>
-        <div class="segment" role="group" aria-label="Waar de kleur van de spelden op slaat">
-          <button type="button" class="chip chip-klein is-actief" data-kleur="soort">Soort</button>
-          <button type="button" class="chip chip-klein" data-kleur="datum">Datum</button>
+        <label class="instelling instelling-vink" id="sorteerRij" hidden>
+          <input type="checkbox" id="sorteerKnop"><span>Dichtstbijzijnde eerst</span>
+        </label>
+
+        <label class="instelling instelling-vink">
+          <input type="checkbox" id="inBeeld" checked><span>Alleen wat op de kaart staat</span>
+        </label>
+
+        <label class="instelling instelling-vink">
+          <input type="checkbox" id="toonGeannuleerd"><span>Ook geannuleerde beurzen</span>
+        </label>
+
+        <div class="instelling">
+          <span>Kleur op</span>
+          <div class="keuzebalk keuzebalk-klein" role="group" aria-label="Waar de kleur van de spelden op slaat">
+            <button type="button" class="is-actief" data-kleur="soort">Soort</button>
+            <button type="button" data-kleur="datum">Datum</button>
+          </div>
         </div>
       </div>
 
+      <!-- 5. Legenda: een sleutel onderaan, in soortmodus tevens filter -->
       <div class="legenda" id="legenda" aria-label="Betekenis van de kleuren"></div>
   </div>
 

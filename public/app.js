@@ -645,9 +645,20 @@ function herstelBeeld() {
   });
 }
 
+/**
+ * Een uitklaplijst die niet op "alles" staat is een actief filter. Dat mag
+ * je kunnen zien zonder de lijst open te klappen, want anders zoek je je
+ * scheel naar waarom er zo weinig beurzen staan.
+ */
+function merkActieveFilters() {
+  $('#type').classList.toggle('is-gefilterd', !!filters.type);
+  $('#straal').classList.toggle('is-gefilterd', !!filters.straal);
+}
+
 /** Filter gewijzigd: opnieuw tekenen en het beeld erop zetten. */
 function naFilter() {
   tekenAlles();
+  merkActieveFilters();
   herstelBeeld();
 }
 
@@ -697,10 +708,13 @@ function zetLocatie(lat, lon, { bewaren = true } = {}) {
     title: 'Jouw locatie',
   }).addTo(kaart).bindPopup('Jouw locatie');
 
-  $('#locatieLabel').textContent = 'Locatie aan';
-  $('#locatieKnop').classList.add('is-actief');
-  $('#straal').hidden = false;
-  $('#sorteerKnop').hidden = false;
+  const knop = $('#locatieKnop');
+  knop.classList.remove('is-bezig', 'is-mis');
+  knop.classList.add('is-actief');
+  knop.title = 'Locatie staat aan — klik om uit te zetten';
+  $('#locatieLabel').textContent = 'Locatie staat aan';
+  $('#straalRij').hidden = false;
+  $('#sorteerRij').hidden = false;
 }
 
 function vraagLocatie() {
@@ -712,32 +726,44 @@ function vraagLocatie() {
     mijnSpeld?.remove();
     mijnSpeld = null;
     try { localStorage.removeItem('kaartjeskaart-locatie'); } catch { /* privémodus */ }
+    const knop = $('#locatieKnop');
+    knop.classList.remove('is-actief', 'is-bezig', 'is-mis');
+    knop.title = 'Mijn locatie gebruiken';
     $('#locatieLabel').textContent = 'Mijn locatie';
-    $('#locatieKnop').classList.remove('is-actief');
-    $('#straal').hidden = true;
+    $('#straalRij').hidden = true;
     $('#straal').value = '';
-    $('#sorteerKnop').hidden = true;
-    $('#sorteerKnop').classList.remove('is-actief');
-    $('#sorteerKnop').setAttribute('aria-pressed', 'false');
+    $('#sorteerRij').hidden = true;
+    $('#sorteerKnop').checked = false;
     naFilter();
     return;
   }
 
+  const knop = $('#locatieKnop');
+  const meldFout = (tekst) => {
+    knop.classList.remove('is-bezig');
+    knop.classList.add('is-mis');
+    knop.title = tekst;
+    $('#locatieLabel').textContent = tekst;
+    setTimeout(() => {
+      knop.classList.remove('is-mis');
+      knop.title = 'Mijn locatie gebruiken';
+      $('#locatieLabel').textContent = 'Mijn locatie';
+    }, 4000);
+  };
+
   if (!navigator.geolocation) {
-    $('#locatieLabel').textContent = 'Niet beschikbaar';
+    meldFout('Deze browser kent je locatie niet');
     return;
   }
-  $('#locatieLabel').textContent = 'Zoeken…';
+  knop.classList.add('is-bezig');
+  knop.title = 'Locatie zoeken…';
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       zetLocatie(pos.coords.latitude, pos.coords.longitude);
       tekenAlles();
       kaart.flyTo([pos.coords.latitude, pos.coords.longitude], 9, { duration: 0.6 });
     },
-    (err) => {
-      $('#locatieLabel').textContent = err.code === err.PERMISSION_DENIED ? 'Geweigerd' : 'Mislukt';
-      setTimeout(() => { $('#locatieLabel').textContent = 'Mijn locatie'; }, 3000);
-    },
+    (err) => meldFout(err.code === err.PERMISSION_DENIED ? 'Toegang geweigerd' : 'Locatie niet gevonden'),
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
   );
 }
@@ -763,9 +789,6 @@ function koppelBediening() {
       const eigen = filters.periode === 'eigen';
       $('#datumrij').hidden = !eigen;
       knop.setAttribute('aria-expanded', String(eigen));
-      // Op mobiel zitten de datumvelden in het ingeklapte deel; die openen
-      // we dan meteen, anders klik je op "Datum…" en gebeurt er niets zichtbaars.
-      if (eigen && !$('.filters').classList.contains('is-open')) $('#meerKnop').click();
       // Bij de eerste keer openen meteen een zinnig bereik voorstellen:
       // vandaag tot drie maanden vooruit.
       if (eigen && !filters.van && !filters.tot) {
@@ -800,12 +823,13 @@ function koppelBediening() {
     });
   }
 
-  // Op een telefoon staat maar een deel van de filters uitgeklapt, zodat de
-  // kaart niet in de verdrukking komt. Deze knop klapt de rest open.
+  // De weergave-instellingen zijn dingen die je één keer zet, dus die staan
+  // ingeklapt onder deze knop.
   $('#meerKnop').addEventListener('click', (ev) => {
-    const open = $('.filters').classList.toggle('is-open');
+    const open = $('#instellingen').hidden;
+    $('#instellingen').hidden = !open;
+    ev.currentTarget.classList.toggle('is-actief', open);
     ev.currentTarget.setAttribute('aria-expanded', String(open));
-    ev.currentTarget.textContent = open ? 'Minder filters' : 'Meer filters';
     requestAnimationFrame(() => kaart.invalidateSize());
   });
 
@@ -816,10 +840,8 @@ function koppelBediening() {
     naFilter();
   });
 
-  $('#sorteerKnop').addEventListener('click', (ev) => {
-    sorteerOpAfstand = !sorteerOpAfstand;
-    ev.currentTarget.classList.toggle('is-actief', sorteerOpAfstand);
-    ev.currentTarget.setAttribute('aria-pressed', String(sorteerOpAfstand));
+  $('#sorteerKnop').addEventListener('change', (ev) => {
+    sorteerOpAfstand = ev.target.checked;
     tekenAlles();
   });
 

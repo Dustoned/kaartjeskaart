@@ -299,7 +299,7 @@ function popupHtml(e) {
 
   return `
     <div class="pop" style="--kleur:${kleur}">
-      ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt="" loading="lazy"></div>` : ''}
+      ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt=""></div>` : ''}
 
       <div class="pop-kop">
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
@@ -338,7 +338,13 @@ function maakSpeld(e) {
     title: `${e.naam} — ${e.stad}`,
   });
   marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPanPadding: [24, 24] });
-  marker.on('popupopen', () => zetGekozen(e.id, true));
+  marker.on('popupopen', (ev) => {
+    zetGekozen(e.id, true);
+    // Laadt de afbeelding niet, dan de hele balk weghalen: liever geen beeld
+    // dan een grijze strook bovenaan het kaartje.
+    const img = ev.popup.getElement()?.querySelector('.pop-beeld img');
+    img?.addEventListener('error', () => img.closest('.pop-beeld')?.remove(), { once: true });
+  });
   return marker;
 }
 

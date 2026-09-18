@@ -59,6 +59,14 @@ evenementen op de agenda verandert en daar een mail over stuurt.
   het ooit geweigerd, dan laat de pagina het met rust; de speldknop blijft
   staan voor wie het later alsnog wil. Geef je later alsnog toestemming in de
   browserinstellingen, dan wordt dat direct opgepikt.
+
+  **Een browser zonder GPS raadt.** Op een desktop leidt hij je positie af uit
+  je IP-adres of de wifi-netwerken om je heen, en dat kan er tientallen
+  kilometers naast zitten. Daarom staat onder de puntjesknop een veld waarin
+  je je plaats of postcode kunt typen; die keuze overschrijft de browser niet
+  meer. En om te voorkomen dat je je afvraagt waarom de afstanden raar zijn,
+  toont de pagina welke plaats hij denkt te zien — met een waarschuwing erbij
+  als de schatting grover is dan twee kilometer.
 - **Kleur op soort of op datum**, met een schakelaar. Let op: 212 van de 235
   evenementen zijn van het soort "Beurs", dus op soort kleuren maakt de kaart
   grotendeels eenkleurig. Op datum is vaak bruikbaarder.

@@ -370,6 +370,50 @@ a { color: inherit; }
   cursor: pointer;
 }
 
+/* Zelf je plaats intypen. Nodig omdat een browser zonder GPS je positie
+   afleidt uit je IP-adres of wifi-netwerk, wat er flink naast kan zitten. */
+.instelling-locatie { align-items: center; }
+.plaatsveld {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+  width: 158px;
+}
+.plaatsveld input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 27px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--rand);
+  background: var(--vlak);
+  color: var(--tekst);
+  font: inherit;
+  font-size: 11.5px;
+}
+.plaatsveld input:focus { outline: none; border-color: var(--accent); }
+.plaatsveld input::placeholder { color: var(--tekst-flauw); }
+.plaatsveld button {
+  flex: 0 0 auto;
+  width: 27px; height: 27px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--rand);
+  background: var(--vlak);
+  color: var(--tekst-zacht);
+  cursor: pointer;
+}
+.plaatsveld button:hover { color: var(--accent-tekst); background: var(--accent); border-color: var(--accent); }
+.plaatsveld button svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+.instelling-uitleg {
+  margin: -1px 0 3px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--tekst-flauw);
+}
+.instelling-uitleg.is-waarschuwing { color: var(--week); }
+
 .zoekveld {
   flex: 1 1 100%;
   display: flex;

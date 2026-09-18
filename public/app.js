@@ -689,15 +689,91 @@ function springNaar(id) {
 
 /* ---------- mijn locatie ---------- */
 
+/* Nominatim, dezelfde dienst die de beurslocaties omzet. Eén verzoek per
+   keer dat je je plaats intypt of je positie laat bepalen — ruim binnen wat
+   die dienst toestaat. */
+const NOMINATIM = 'https://nominatim.openstreetmap.org';
+
+/** Zoekt de coördinaten bij een ingetypte plaats of postcode. */
+async function zoekPlaats(tekst) {
+  const url = new URL(`${NOMINATIM}/search`);
+  url.searchParams.set('q', tekst);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('limit', '1');
+  url.searchParams.set('countrycodes', 'nl,be');
+  url.searchParams.set('addressdetails', '1');
+  const res = await fetch(url, { headers: { 'Accept-Language': 'nl' }, signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Nominatim ${res.status}`);
+  const [treffer] = await res.json();
+  if (!treffer) throw new Error('niets gevonden');
+  return { lat: Number(treffer.lat), lon: Number(treffer.lon), naam: korteNaam(treffer.address, treffer.display_name) };
+}
+
+/** Zoekt de plaatsnaam bij coördinaten, zodat je kunt zien of het klopt. */
+async function benoemLocatie(lat, lon) {
+  const url = new URL(`${NOMINATIM}/reverse`);
+  url.searchParams.set('lat', lat);
+  url.searchParams.set('lon', lon);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('zoom', '13');
+  const res = await fetch(url, { headers: { 'Accept-Language': 'nl' }, signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Nominatim ${res.status}`);
+  const body = await res.json();
+  return korteNaam(body.address, body.display_name);
+}
+
+/** "Utrecht" in plaats van de hele adresregel. */
+function korteNaam(adres, volledig) {
+  const plaats = adres?.city ?? adres?.town ?? adres?.village ?? adres?.municipality ?? adres?.suburb ?? adres?.county;
+  return plaats ?? volledig?.split(',')[0] ?? null;
+}
+
+/**
+ * Zet de regel onder "Jouw locatie": waar hij denkt dat je bent, en hoe
+ * grof die schatting is. Een browser zonder GPS gokt op je IP-adres of
+ * wifi-netwerk, en dat kan er kilometers naast zitten — dan moet je dat
+ * kunnen zien in plaats van je af te vragen waarom de afstanden raar zijn.
+ */
+function toonLocatieUitleg(tekst, waarschuwing = false) {
+  const el = $('#locatieUitleg');
+  el.hidden = !tekst;
+  el.textContent = tekst ?? '';
+  el.classList.toggle('is-waarschuwing', waarschuwing);
+}
+
 /**
  * Zet de eigen locatie en werkt de bediening bij. De coördinaten blijven
  * op dit apparaat: ze gaan alleen naar localStorage, zodat je na een
  * herlaadbeurt niet opnieuw toestemming hoeft te geven.
  */
-function zetLocatie(lat, lon, { bewaren = true } = {}) {
-  mijnLocatie = { lat, lon };
+function zetLocatie(lat, lon, { bewaren = true, naam = null, nauwkeurigheid = null, handmatig = false } = {}) {
+  mijnLocatie = { lat, lon, naam, handmatig };
   if (bewaren) {
     try { localStorage.setItem('kaartjeskaart-locatie', JSON.stringify(mijnLocatie)); } catch { /* privémodus */ }
+  }
+  // Rijtijden gelden vanaf een vertrekpunt; verschuift dat, dan kloppen de
+  // onthouden antwoorden niet meer.
+  reistijden.clear();
+
+  if (naam) {
+    toonLocatieUitleg(handmatig ? `Ingesteld op ${naam}.` : `Gevonden: ${naam}.`);
+  } else {
+    // Nog geen naam bekend: die zoeken we erbij, zodat je kunt controleren
+    // of het klopt.
+    toonLocatieUitleg('Locatie bepalen…');
+    benoemLocatie(lat, lon)
+      .then((gevonden) => {
+        if (!mijnLocatie || mijnLocatie.lat !== lat) return; // ondertussen veranderd
+        mijnLocatie.naam = gevonden;
+        const grof = nauwkeurigheid && nauwkeurigheid > 2000;
+        toonLocatieUitleg(
+          grof
+            ? `Gevonden: ${gevonden}, maar op zo'n ${Math.round(nauwkeurigheid / 1000)} km nauwkeurig. Klopt dat niet, typ dan je plaats hierboven.`
+            : `Gevonden: ${gevonden}. Klopt dat niet, typ dan je plaats hierboven.`,
+          grof,
+        );
+      })
+      .catch(() => toonLocatieUitleg('Klopt de locatie niet? Typ hierboven je plaats.'));
   }
 
   if (mijnSpeld) mijnSpeld.remove();
@@ -734,6 +810,8 @@ function vraagLocatie() {
     $('#straal').value = '';
     $('#sorteerRij').hidden = true;
     $('#sorteerKnop').checked = false;
+    reistijden.clear();
+    toonLocatieUitleg(null);
     naFilter();
     return;
   }
@@ -774,12 +852,16 @@ function haalPositie({ verplaatsKaart = false, stil = false } = {}) {
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      zetLocatie(pos.coords.latitude, pos.coords.longitude);
+      const { latitude, longitude, accuracy } = pos.coords;
+      zetLocatie(latitude, longitude, { nauwkeurigheid: accuracy });
       tekenAlles();
-      if (verplaatsKaart) kaart.flyTo([pos.coords.latitude, pos.coords.longitude], 9, { duration: 0.6 });
+      if (verplaatsKaart) kaart.flyTo([latitude, longitude], 9, { duration: 0.6 });
     },
     (err) => meldFout(err.code === err.PERMISSION_DENIED ? 'Toegang geweigerd' : 'Locatie niet gevonden'),
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    // Wel om de beste bron vragen: op een telefoon levert dat GPS op in
+    // plaats van een gok op basis van het wifi-netwerk. En geen oud antwoord
+    // hergebruiken, want dat is juist vaak de slechte schatting.
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 },
   );
 }
 
@@ -798,13 +880,23 @@ function haalPositie({ verplaatsKaart = false, stil = false } = {}) {
  *    later alsnog wil.
  */
 async function regelLocatieBijOpstart() {
+  let handmatigGezet = false;
   try {
     const bewaard = JSON.parse(localStorage.getItem('kaartjeskaart-locatie') ?? 'null');
     if (bewaard?.lat && bewaard?.lon) {
-      zetLocatie(bewaard.lat, bewaard.lon, { bewaren: false });
+      handmatigGezet = !!bewaard.handmatig;
+      zetLocatie(bewaard.lat, bewaard.lon, {
+        bewaren: false,
+        naam: bewaard.naam ?? null,
+        handmatig: handmatigGezet,
+      });
       tekenAlles(); // afstanden meteen in de lijst
     }
   } catch { /* privémodus of rommel in de opslag */ }
+
+  // Heb je je plaats zelf ingetypt, dan is dat een bewuste keuze. Die gaan
+  // we niet overschrijven met de gok van de browser.
+  if (handmatigGezet) return;
 
   // Niet elke browser kent de Permissions API; dan vragen we het gewoon,
   // tenzij we al een locatie hebben.
@@ -896,6 +988,27 @@ function koppelBediening() {
   });
 
   $('#locatieKnop').addEventListener('click', vraagLocatie);
+
+  /** Een ingetypte plaats of postcode als vertrekpunt gebruiken. */
+  async function gebruikIngetypt() {
+    const tekst = $('#plaatsInvoer').value.trim();
+    if (!tekst) return;
+    toonLocatieUitleg('Zoeken…');
+    try {
+      const { lat, lon, naam } = await zoekPlaats(tekst);
+      zetLocatie(lat, lon, { naam, handmatig: true });
+      $('#plaatsInvoer').value = '';
+      tekenAlles();
+      kaart.flyTo([lat, lon], 9, { duration: 0.6 });
+    } catch {
+      toonLocatieUitleg(`Geen plaats gevonden voor "${tekst}".`, true);
+    }
+  }
+
+  $('#plaatsZoek').addEventListener('click', gebruikIngetypt);
+  $('#plaatsInvoer').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); gebruikIngetypt(); }
+  });
 
   $('#straal').addEventListener('change', (ev) => {
     filters.straal = ev.target.value ? Number(ev.target.value) : null;

@@ -90,6 +90,17 @@
 
       <!-- 4. Weergave-instellingen, uitklapbaar: dingen die je één keer zet -->
       <div class="instellingen" id="instellingen" hidden>
+        <div class="instelling instelling-locatie">
+          <span>Jouw locatie</span>
+          <div class="plaatsveld">
+            <input type="search" id="plaatsInvoer" placeholder="plaats of postcode" autocomplete="postal-code" aria-label="Jouw plaats of postcode">
+            <button type="button" id="plaatsZoek" title="Deze plaats gebruiken" aria-label="Deze plaats gebruiken">
+              <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M5 12.5l5 5 9-11"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="instelling-uitleg" id="locatieUitleg" hidden></p>
+
         <label class="instelling" id="straalRij" hidden>
           <span>Alleen binnen</span>
           <div class="keuzeveld keuzeveld-klein">

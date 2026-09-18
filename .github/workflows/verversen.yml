@@ -1,0 +1,79 @@
+name: Verversen en publiceren
+
+on:
+  schedule:
+    # 05:12 UTC — net na de nacht, en een oneven minuut omdat GitHub op
+    # het hele uur druk is en taken dan kunnen blijven hangen.
+    - cron: '12 5 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Niet twee keer tegelijk publiceren, maar een draaiende run ook niet
+# afbreken: die zit mogelijk midden in het geocoden.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  verversen:
+    runs-on: ubuntu-latest
+    # Bij een push is de data al bijgewerkt; dan alleen publiceren.
+    if: github.event_name != 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Eerst de parser tegen de meegeleverde voorbeeldpagina, want dat kost
+      # geen Firecrawl-credit. Is de parser stuk, dan stopt het hier.
+      - name: Parser controleren
+        run: node scripts/test-parse.mjs sample-index.md
+
+      - name: Agenda ophalen en verwerken
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: node scripts/refresh.mjs
+
+      - name: Wijzigingen vastleggen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/events.json data/venues.json
+          if git diff --staged --quiet; then
+            echo "Geen wijzigingen in de agenda."
+          else
+            AANTAL=$(node -e "console.log(require('./public/events.json').aantal)")
+            git commit -m "Agenda bijgewerkt: $AANTAL evenementen"
+            git push
+          fi
+
+  publiceren:
+    runs-on: ubuntu-latest
+    needs: [verversen]
+    # Ook publiceren als 'verversen' is overgeslagen (bij een push).
+    if: always() && needs.verversen.result != 'failure'
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # De commit die 'verversen' zojuist duwde, moet meegenomen worden.
+          ref: main
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

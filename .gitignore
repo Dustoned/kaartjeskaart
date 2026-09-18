@@ -1,0 +1,7 @@
+.firecrawl/
+node_modules/
+.geocode.log
+.monitor-*.json
+.DS_Store
+Thumbs.db
+.serve.log

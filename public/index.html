@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kaartjeskaart</title>
+<meta name="description" content="Alle Pokémon-kaartenbeurzen in Nederland en België op één kaart.">
+<meta name="color-scheme" content="dark light">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ff5a4e'/><path d='M4 50h92' stroke='%230f1216' stroke-width='9'/><circle cx='50' cy='50' r='15' fill='%230f1216'/><circle cx='50' cy='50' r='8' fill='%23fff'/></svg>">
+
+<link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css" integrity="sha512-ENrTWqddXrLJsQS2A86QmvA17PkJ0GVm1bqj5aTgpeMAfDKN2+SIOLpKG8R/6KkimnhTb+VW5qqUHB/r1zaRgg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-weergave="kaart">
+
+<header class="kop">
+  <div class="merk">
+    <span class="merk-bal" aria-hidden="true"></span>
+    <div>
+      <h1>Kaartjeskaart</h1>
+      <p class="merk-onder">Pokémon-beurzen in Nederland &amp; België</p>
+    </div>
+  </div>
+
+  <div class="kop-rechts">
+    <output class="teller" id="teller" aria-live="polite">laden…</output>
+    <button type="button" class="icoonknop" id="themaknop" aria-label="Wissel tussen donker en licht thema" title="Donker / licht">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="icoon-maan" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/><g class="icoon-zon"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></g></svg>
+    </button>
+  </div>
+</header>
+
+<div class="werkblad">
+
+  <!-- De filters staan bewust buiten het paneel: op mobiel wissel je tussen
+       kaart en lijst, en de filters moeten in allebei bereikbaar blijven. -->
+  <div class="filters">
+
+      <div class="filterrij" role="group" aria-label="Periode">
+        <button type="button" class="chip" data-periode="weekend">Dit weekend</button>
+        <button type="button" class="chip" data-periode="7">7 dagen</button>
+        <button type="button" class="chip is-actief" data-periode="30">30 dagen</button>
+        <button type="button" class="chip" data-periode="alles">Alles</button>
+      </div>
+
+      <div class="filterrij">
+        <div class="zoekveld">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+          <input type="search" id="zoek" placeholder="Zoek op plaats, zaal of naam" autocomplete="off" aria-label="Zoeken">
+        </div>
+      </div>
+
+      <div class="filterrij">
+        <div class="segment" role="group" aria-label="Land">
+          <button type="button" class="chip chip-land is-actief" data-land="NL">
+            <svg class="vlag" viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="6" fill="#21468B"/><rect width="9" height="4" fill="#fff"/><rect width="9" height="2" fill="#AE1C28"/></svg>NL
+          </button>
+          <button type="button" class="chip chip-land is-actief" data-land="BE">
+            <svg class="vlag" viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="6" fill="#ED2939"/><rect width="6" height="6" fill="#FAE042"/><rect width="3" height="6" fill="#000"/></svg>BE
+          </button>
+        </div>
+        <select id="type" aria-label="Soort evenement">
+          <option value="">Alle soorten</option>
+        </select>
+      </div>
+
+      <div class="filterrij filterrij-fijn">
+        <label class="schakel"><input type="checkbox" id="inBeeld"> <span>Alleen in beeld</span></label>
+        <label class="schakel"><input type="checkbox" id="toonGeannuleerd"> <span>Toon geannuleerd</span></label>
+      </div>
+
+      <div class="legenda" aria-label="Betekenis van de kleuren">
+        <span class="legenda-item"><i class="stip stip-vandaag"></i>vandaag</span>
+        <span class="legenda-item"><i class="stip stip-week"></i>≤&nbsp;7&nbsp;dgn</span>
+        <span class="legenda-item"><i class="stip stip-maand"></i>≤&nbsp;30&nbsp;dgn</span>
+        <span class="legenda-item"><i class="stip stip-later"></i>later</span>
+      </div>
+  </div>
+
+  <aside class="paneel" id="paneel">
+    <div class="lijst" id="lijst" tabindex="-1"></div>
+
+    <footer class="voet">
+      <span id="bijgewerkt">—</span>
+      <span class="voet-scheiding">·</span>
+      <span>bron: <a href="https://www.pokeradar.nl/evenement" target="_blank" rel="noopener noreferrer">pokeradar.nl</a></span>
+    </footer>
+  </aside>
+
+  <main class="kaartvak">
+    <div id="kaart" role="application" aria-label="Kaart met beurzen"></div>
+  </main>
+</div>
+
+<nav class="mobielschakel" aria-label="Weergave">
+  <button type="button" class="mobielknop is-actief" data-weergave="kaart">Kaart</button>
+  <button type="button" class="mobielknop" data-weergave="lijst">Lijst <span class="mobiel-telling" id="mobielTelling"></span></button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js" integrity="sha512-TiMWaqipFi2Vqt4ugRzsF8oRoGFlFFuqIi30FFxEPNw58Ov9mOy6LgC05ysfkxwLE0xVeZtmr92wVg9siAFRWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="app.js"></script>
+</body>
+</html>

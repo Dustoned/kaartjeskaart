@@ -1,0 +1,1034 @@
+{
+  "Aarschot|": {
+    "lat": 50.98427,
+    "lon": 4.83643,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Aarschot",
+    "osm": "Aarschot, Leuven, Vlaams-Brabant, Vlaanderen, België"
+  },
+  "Aarschot|Stadsfeestzaal": {
+    "lat": 50.98209,
+    "lon": 4.83881,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Stadsfeestzaal, Aarschot",
+    "osm": "Parking Stadsfeestzaal, Demervallei, Aarschot, Leuven, Vlaams-Brabant, Vlaanderen, 3200, België"
+  },
+  "Alkmaar|Sportpaleis Alkmaar": {
+    "lat": 52.63474,
+    "lon": 4.71636,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sportpaleis Alkmaar, Alkmaar",
+    "osm": "Sportpaleis Alkmaar, 200, Terborchlaan, West, Alkmaar, Noord-Holland, Nederland, 1816 LE, Nederland"
+  },
+  "Almelo|Topsporthal IISPA": {
+    "lat": 52.35636,
+    "lon": 6.66362,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Almelo",
+    "osm": "Almelo, Overijssel, Nederland"
+  },
+  "Amersfoort|Sporthal Zielhorst": {
+    "lat": 52.17886,
+    "lon": 5.40206,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sporthal Zielhorst, Amersfoort",
+    "osm": "Sporthal Zielhorst, 3, Trompetstraat, Zielhorst, Amersfoort, Utrecht, Nederland, 3822 CK, Nederland"
+  },
+  "Amstelveen|Emergohal": {
+    "lat": 52.29014,
+    "lon": 4.87926,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Emergohal, Amstelveen",
+    "osm": "Emergohal, Langs de Akker, Amstelveen, Noord-Holland, Nederland, 1186 DA, Nederland"
+  },
+  "Amsterdam|Blast Galaxy": {
+    "lat": 52.39015,
+    "lon": 4.85386,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Blast Galaxy, Amsterdam",
+    "osm": "Blast Galaxy, 5, Magneetstraat, Sloterdijk, West, Amsterdam, Noord-Holland, Nederland, 1014 CC, Nederland"
+  },
+  "Amsterdam|Kromhouthal": {
+    "lat": 52.3833,
+    "lon": 4.92049,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Kromhouthal, Amsterdam",
+    "osm": "Kromhouthal, 231, Gedempt Hamerkanaal, Hamerkwartier, Noord, Amsterdam, Noord-Holland, Nederland, 1021 KP, Nederland"
+  },
+  "Amsterdam|Sportcentrum Ookmeer": {
+    "lat": 52.36825,
+    "lon": 4.80393,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sportcentrum Ookmeer, Amsterdam",
+    "osm": "Sportcentrum Ookmeer, 7, Dokter Meurerlaan, Nieuw-West, Amsterdam, Noord-Holland, Nederland, 1067 SM, Nederland"
+  },
+  "Antwerpen|Antwerp Expo": {
+    "lat": 51.19212,
+    "lon": 4.39957,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Antwerp Expo, Antwerpen",
+    "osm": "Antwerp Expo, Jan Van Rijswijcklaan, Tentoonstellingswijk, Antwerpen, Vlaanderen, 2020, België"
+  },
+  "Ardooie|Evenementenhal De Ark": {
+    "lat": 50.97979,
+    "lon": 3.19743,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Ardooie",
+    "osm": "Ardooie, Tielt, West-Vlaanderen, Vlaanderen, België"
+  },
+  "Assen|De Bonte Wever": {
+    "lat": 52.98374,
+    "lon": 6.54147,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Bonte Wever, Assen",
+    "osm": "De Bonte Wever, 17, Stadsbroek, Baggelhuizen, Assen West, Assen, Drenthe, Nederland, 9405 BK, Nederland"
+  },
+  "Barneveld|De Veluwehal Barneveld": {
+    "lat": 52.17151,
+    "lon": 5.64544,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Barneveld",
+    "osm": "Barneveld, Gelderland, Nederland"
+  },
+  "Beesd|": {
+    "lat": 51.88409,
+    "lon": 5.19164,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Beesd",
+    "osm": "Beesd, West Betuwe, Gelderland, Nederland"
+  },
+  "Beesd|Club Rodenburg": {
+    "lat": 51.88409,
+    "lon": 5.19164,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Beesd",
+    "osm": "Beesd, West Betuwe, Gelderland, Nederland"
+  },
+  "Berlare|Festivalhal Donkmeer": {
+    "lat": 51.02516,
+    "lon": 4.00347,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Berlare",
+    "osm": "Berlare, Dendermonde, Oost-Vlaanderen, Vlaanderen, 9290, België"
+  },
+  "Boskoop|Villa Kabaal": {
+    "lat": 52.07423,
+    "lon": 4.66312,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Boskoop",
+    "osm": "Boskoop, Alphen aan den Rijn, Zuid-Holland, Nederland"
+  },
+  "Brasschaat|Card & Crunch": {
+    "lat": 51.29007,
+    "lon": 4.49173,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Brasschaat",
+    "osm": "Brasschaat, Antwerpen, Vlaanderen, 2930, België"
+  },
+  "Brasschaat|Parochiezaal D'ouwe Kerk": {
+    "lat": 51.29007,
+    "lon": 4.49173,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Brasschaat",
+    "osm": "Brasschaat, Antwerpen, Vlaanderen, 2930, België"
+  },
+  "Brecht|'t Centrum Sint-Lenaarts": {
+    "lat": 51.34759,
+    "lon": 4.67411,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "'t Centrum Sint-Lenaarts, Brecht",
+    "osm": "GO! daltonschool In 't Groen, 15, Leopoldstraat, Sint-Lenaarts-Centrum, Sint-Lenaarts, Brecht, Malle, Antwerpen, Vlaanderen, 2960, België"
+  },
+  "Brielle|Brielse Boer": {
+    "lat": 51.90166,
+    "lon": 4.16263,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Brielle",
+    "osm": "Brielle, Voorne aan Zee, Zuid-Holland, Nederland"
+  },
+  "Brugge|MAST Sint-Michiels": {
+    "lat": 51.18928,
+    "lon": 3.20866,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "MAST Sint-Michiels, Brugge",
+    "osm": "MAST Sint-Michiels, 2, Veldstraat, Sint-Michiels, Brugge, West-Vlaanderen, Vlaanderen, 8200, België"
+  },
+  "Brugge|Wijkcentrum Xaverianen": {
+    "lat": 51.20855,
+    "lon": 3.22677,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Brugge",
+    "osm": "Brugge, West-Vlaanderen, Vlaanderen, België"
+  },
+  "Deinze|Eetzaal Erasmusatheneum": {
+    "lat": 50.98419,
+    "lon": 3.52704,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Deinze",
+    "osm": "Deinze, Gent, Oost-Vlaanderen, Vlaanderen, België"
+  },
+  "Den Haag|Lindo Beach": {
+    "lat": 52.07998,
+    "lon": 4.31135,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Den Haag",
+    "osm": "Den Haag, Zuid-Holland, Nederland"
+  },
+  "Den Haag|Opera Zalencentrum": {
+    "lat": 52.05849,
+    "lon": 4.30617,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Opera Zalencentrum, Den Haag",
+    "osm": "Opera Zalencentrum, 28, Fruitweg, Groente- en Fruitmarkt, Centrum, Den Haag, Zuid-Holland, Nederland, 2525 KH, Nederland"
+  },
+  "Den Haag|Sporthal Leidschenveen": {
+    "lat": 52.06745,
+    "lon": 4.39844,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sporthal Leidschenveen, Den Haag",
+    "osm": "Sporthal Leidschenveen, 20, Vaz Diasdreef, Leidschenveen, Leidschenveen-Ypenburg, Den Haag, Zuid-Holland, Nederland, 2492 JL, Nederland"
+  },
+  "Dongen|De Cammeleur": {
+    "lat": 51.62684,
+    "lon": 4.94176,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Cammeleur, Dongen",
+    "osm": "De Cammeleur, Hoge Ham, Dongen, Noord-Brabant, Nederland, 5104 JZ, Nederland"
+  },
+  "Duffel|Feestzaal 'T Lepeltje": {
+    "lat": 51.08307,
+    "lon": 4.51319,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Feestzaal 'T Lepeltje, Duffel",
+    "osm": "Feestzaal ' t Gouden Lepeltje, 43D, Naalstraat, Duffel, Mechelen, Antwerpen, Vlaanderen, 2570, België"
+  },
+  "Ede|Bloemenveiling Plantion": {
+    "lat": 52.07168,
+    "lon": 5.74551,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Ede",
+    "osm": "Ede, Gelderland, Nederland"
+  },
+  "Eemnes|": {
+    "lat": 52.25337,
+    "lon": 5.2601,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Eemnes",
+    "osm": "Eemnes, Utrecht, Nederland"
+  },
+  "Eemnes|Huis van Eemnes": {
+    "lat": 52.25541,
+    "lon": 5.26466,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Huis van Eemnes, Eemnes",
+    "osm": "Huis van Eemnes, 4, Noordersingel, Eemnes, Utrecht, Nederland, 3755 EZ, Nederland"
+  },
+  "Egmond aan Zee|Hotel Zuiderduin": {
+    "lat": 52.61644,
+    "lon": 4.62502,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Hotel Zuiderduin, Egmond aan Zee",
+    "osm": "Zuiderduin, 52, Zeeweg, Egmond aan Zee, Bergen, Noord-Holland, Nederland, 1931 VL, Nederland"
+  },
+  "Ermelo|Sportcentrum Zanderij": {
+    "lat": 52.28784,
+    "lon": 5.60075,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sportcentrum Zanderij, Ermelo",
+    "osm": "Sportcentrum Zanderij, Oude Telgterweg, Ermelo, Gelderland, Nederland, 3853 PJ, Nederland"
+  },
+  "Essen|Den Baptist": {
+    "lat": 51.42582,
+    "lon": 4.47058,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Den Baptist, Essen",
+    "osm": "PC den Baptist, 146, Sint-Jansstraat, Middel, Essen, Antwerpen, Vlaanderen, 2910, België"
+  },
+  "Etten-Leur|De Grauwe Polder": {
+    "lat": 51.55482,
+    "lon": 4.63458,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Grauwe Polder, Etten-Leur",
+    "osm": "Volkstuindersvereniging Etten-Leur De Streek, De Streek, Etten-Leur, Noord-Brabant, Nederland"
+  },
+  "Etten-Leur|Het Turfschip": {
+    "lat": 51.58774,
+    "lon": 4.65588,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Het Turfschip, Etten-Leur",
+    "osm": "Het Turfschip, 2, Schipperstraat, Noord, Attelaken, Etten-Leur, Noord-Brabant, Nederland, 4871 KK, Nederland"
+  },
+  "Evergem|": {
+    "lat": 51.10879,
+    "lon": 3.70786,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Evergem",
+    "osm": "Evergem, Gent, Oost-Vlaanderen, Vlaanderen, 9940, België"
+  },
+  "Evergem|OC De Burggrave": {
+    "lat": 51.11811,
+    "lon": 3.74118,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "OC De Burggrave, Evergem",
+    "osm": "OC De Burggrave, 38, Grovermansdreef, Tuinwijk Herryville, Langerbrugge, Evergem, Gent, Oost-Vlaanderen, Vlaanderen, 9940, België"
+  },
+  "Geel|Parochie Centrum Sint Amands": {
+    "lat": 51.16108,
+    "lon": 4.99032,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Geel",
+    "osm": "Geel, Laakdal, Turnhout, Antwerpen, Vlaanderen, 2440, België"
+  },
+  "Genk|Limburghal": {
+    "lat": 50.96515,
+    "lon": 5.48687,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Limburghal, Genk",
+    "osm": "Limburghal, 2-8, Jaarbeurslaan, Nieuw-Termien, Winterslag, Genk, Heusden-Zolder, Hasselt, Limburg, Vlaanderen, 3600, België"
+  },
+  "Goes|Zeelandhallen (Noordzeehal)": {
+    "lat": 51.5031,
+    "lon": 3.88976,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Goes",
+    "osm": "Goes, Zeeland, Nederland"
+  },
+  "Groningen|De Loods": {
+    "lat": 53.22432,
+    "lon": 6.56568,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Loods, Groningen",
+    "osm": "De Loods, Langestraat, Ebbingekwartier, Centrum, Groningen, Nederland, 9712 ML, Nederland"
+  },
+  "Groningen|Martini Plaza": {
+    "lat": 53.21907,
+    "lon": 6.56801,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Groningen",
+    "osm": "Groningen, Nederland"
+  },
+  "Haarlem|Kennemer Sportcenter": {
+    "lat": 52.40041,
+    "lon": 4.62663,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Kennemer Sportcenter, Haarlem",
+    "osm": "Kennemer Sportcenter, 4a, IJsbaanlaan, Haarlem, Noord-Holland, Nederland, 2024 AV, Nederland"
+  },
+  "Halen|Rietbron – Halen": {
+    "lat": 50.94641,
+    "lon": 5.11551,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Rietbron – Halen, Halen",
+    "osm": "GC De Rietbron, 4A, Sportlaan, Halen, Heusden-Zolder, Hasselt, Limburg, Vlaanderen, 3545, België"
+  },
+  "Harderwijk|Sportcomplex de Sypel": {
+    "lat": 52.34907,
+    "lon": 5.61893,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Harderwijk",
+    "osm": "Harderwijk, Gelderland, Nederland"
+  },
+  "Hasselt|Trixxo Arena Hasselt": {
+    "lat": 50.93446,
+    "lon": 5.36277,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Trixxo Arena Hasselt, Hasselt",
+    "osm": "Trixxo Arena, Gouverneur Verwilghensingel, Kempische wijk, Godsheide, Hasselt, Heusden-Zolder, Hasselt, Limburg, Vlaanderen, 3500, België"
+  },
+  "Heerenveen|Sportstad Heerenveen": {
+    "lat": 52.95736,
+    "lon": 5.93744,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sportstad Heerenveen, Heerenveen",
+    "osm": "Sportstad Heerenveen, Abe Lenstra boulevard, Heerenveen, Fryslân, Nederland, 8448 JA, Nederland"
+  },
+  "Heerhugowaard|Event Center Heerhugowaard": {
+    "lat": 52.66315,
+    "lon": 4.83267,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Heerhugowaard",
+    "osm": "Heerhugowaard, Dijk en Waard, Noord-Holland, Nederland"
+  },
+  "Heerlen|Sporthal A gene Bek": {
+    "lat": 50.87752,
+    "lon": 5.98151,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Heerlen",
+    "osm": "Heerlen, Limburg, Nederland"
+  },
+  "Heinenoord|Sporthal de Tienvoet": {
+    "lat": 51.8243,
+    "lon": 4.47761,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sporthal de Tienvoet, Heinenoord",
+    "osm": "Sporthal, Tienvoet, Oranjebuurt, Heinenoord, Hoeksche Waard, Zuid-Holland, Nederland, 3274 BN, Nederland"
+  },
+  "Hilversum|Wijkcentrum de Geus": {
+    "lat": 52.22414,
+    "lon": 5.17194,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Hilversum",
+    "osm": "Hilversum, Noord-Holland, Nederland"
+  },
+  "Hoensbroek|Ons Trefcentrum": {
+    "lat": 50.91463,
+    "lon": 5.9269,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Ons Trefcentrum, Hoensbroek",
+    "osm": "MFC Ons Trefcentrum, Pius XII-plein, Nieuw Lotbroek-Noord, Nieuw Lotbroek, Hoensbroek, Heerlen, Limburg, Nederland, 6433 CZ, Nederland"
+  },
+  "Hoevelaken|De Stuw": {
+    "lat": 52.17614,
+    "lon": 5.45536,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Stuw, Hoevelaken",
+    "osm": "De Stuw, 10c, De Brink, Hoevelaken, Nijkerk, Gelderland, Nederland, 3871 AM, Nederland"
+  },
+  "Hoogeveen|Sporthal het Activum": {
+    "lat": 52.72643,
+    "lon": 6.49308,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Hoogeveen",
+    "osm": "Hoogeveen, Drenthe, Nederland"
+  },
+  "Hoogstraten|Feestzaal Klein Seminarie": {
+    "lat": 51.40129,
+    "lon": 4.76169,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Hoogstraten",
+    "osm": "Hoogstraten, Turnhout, Antwerpen, Vlaanderen, België"
+  },
+  "Hoorn|Sportcentrum Hoorn": {
+    "lat": 52.64962,
+    "lon": 5.07519,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sportcentrum Hoorn, Hoorn",
+    "osm": "Sportcentrum Hoorn, 14a, Holenweg, Venenlaankwartier, Hoorn, Noord-Holland, Nederland, 1624 PB, Nederland"
+  },
+  "Huizen|Sporthal de Meent": {
+    "lat": 52.29648,
+    "lon": 5.24058,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Huizen",
+    "osm": "Huizen, Noord-Holland, Nederland"
+  },
+  "Hulst|Den Dullaert": {
+    "lat": 51.29035,
+    "lon": 4.05394,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Den Dullaert, Hulst",
+    "osm": "Den Dullaert, Sportlaan, Dullaert, Hulst, Zeeland, Nederland, 4561 KZ, Nederland"
+  },
+  "Ichtegem|Sporthal Ichtegem": {
+    "lat": 51.0906,
+    "lon": 3.02397,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Sporthal Ichtegem, Ichtegem",
+    "osm": "Sporthal Ichtegem, 30A;30B, Keibergstraat, Ichtegem, Oostende, West-Vlaanderen, Vlaanderen, 8480, België"
+  },
+  "Ieper|Fenix": {
+    "lat": 50.8464,
+    "lon": 2.89414,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Fenix, Ieper",
+    "osm": "De Fenix, 16, Leopold III-laan, Ieper, West-Vlaanderen, Vlaanderen, 8900, België"
+  },
+  "Kerkrade|Flexiforum": {
+    "lat": 50.85885,
+    "lon": 6.01829,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Flexiforum, Kerkrade",
+    "osm": "Flexiforum, Spekhofstraat, Locht, Kerkrade-West, Kerkrade, Limburg, Nederland, 6466 LZ, Nederland"
+  },
+  "Koksijde|Feestzaal Witte Burg": {
+    "lat": 51.11877,
+    "lon": 2.63493,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Koksijde",
+    "osm": "Koksijde, Veurne, West-Vlaanderen, Vlaanderen, 8670, België"
+  },
+  "Krimpen aan den IJssel|Winkelcentrum Crimpenhof": {
+    "lat": 51.91515,
+    "lon": 4.58936,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Winkelcentrum Crimpenhof, Krimpen aan den IJssel",
+    "osm": "Winkelcentrum Crimpenhof, Raadhuisplein, Krimpen aan den IJssel, Zuid-Holland, Nederland, 2922 AG, Nederland"
+  },
+  "Laakdal|Expo De Kempen": {
+    "lat": 51.08013,
+    "lon": 4.95523,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Laakdal",
+    "osm": "Laakdal, Turnhout, Antwerpen, Vlaanderen, België"
+  },
+  "Landen|Bovenbouw Sint-Gertrudis": {
+    "lat": 50.75301,
+    "lon": 5.08132,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Landen",
+    "osm": "Landen, Leuven, Vlaams-Brabant, Vlaanderen, België"
+  },
+  "Leiden|ECC Leiden": {
+    "lat": 52.16346,
+    "lon": 4.45589,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "ECC Leiden, Leiden",
+    "osm": "ECC Leiden, Haagse Schouwweg, Koppelstein, De Mors, Leiden, Zuid-Holland, Nederland, 2332 KG, Nederland"
+  },
+  "Lekkerkerk|Amicitia & Grand Cafe Roos": {
+    "lat": 51.89696,
+    "lon": 4.68327,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Lekkerkerk",
+    "osm": "Lekkerkerk, Krimpenerwaard, Zuid-Holland, Nederland"
+  },
+  "Lelystad|": {
+    "lat": 52.51509,
+    "lon": 5.47689,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Lelystad",
+    "osm": "Lelystad, Flevoland, Nederland"
+  },
+  "Lelystad|Showroom Flevocards": {
+    "lat": 52.51509,
+    "lon": 5.47689,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Lelystad",
+    "osm": "Lelystad, Flevoland, Nederland"
+  },
+  "Lelystad|Van der Valk Hotel Lelystad": {
+    "lat": 52.48242,
+    "lon": 5.50307,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Van der Valk Hotel Lelystad, Lelystad",
+    "osm": "Hotel Lelystad, 1, Larserplein, Lelystad, Flevoland, Nederland, 8226 PB, Nederland"
+  },
+  "Leuven|Brabanthal Haasrode": {
+    "lat": 50.8527,
+    "lon": 4.72764,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Brabanthal Haasrode, Leuven",
+    "osm": "Haasrode Brabanthal, Esperantolaan, Leuvens Haasrode, Heverlee, Leuven, Vlaams-Brabant, Vlaanderen, 3001, België"
+  },
+  "Lisse|Intratuin Lisse": {
+    "lat": 52.25009,
+    "lon": 4.54288,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Intratuin Lisse, Lisse",
+    "osm": "Intratuin, 350, Heereweg, De Engel, Lisse, Zuid-Holland, Nederland, 2161 CC, Nederland"
+  },
+  "Lommel|De Soeverein": {
+    "lat": 51.2451,
+    "lon": 5.30534,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "De Soeverein, Lommel",
+    "osm": "De Soeverein Arena, 10, Sportveldenstraat, Lommel, Hamont-Achel, Maaseik, Limburg, Vlaanderen, 3920, België"
+  },
+  "Maarssen|De Pannekoekenbakker": {
+    "lat": 52.14275,
+    "lon": 5.0797,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Pannekoekenbakker, Maarssen",
+    "osm": "De Pannekoekenbakker, 53-2, Herenweg, Maarssen, Stichtse Vecht, Utrecht, Nederland, 3602 AN, Nederland"
+  },
+  "Maastricht|Buurtcentrum De Boeckel": {
+    "lat": 50.85799,
+    "lon": 5.69699,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Maastricht",
+    "osm": "Maastricht, Limburg, Nederland"
+  },
+  "Maldegem|Eventhall-me": {
+    "lat": 51.20889,
+    "lon": 3.44522,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Maldegem",
+    "osm": "Maldegem, Eeklo, Oost-Vlaanderen, Vlaanderen, België"
+  },
+  "Merelbeke|Gemeentehallen": {
+    "lat": 50.98885,
+    "lon": 3.7532,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Gemeentehallen, Merelbeke",
+    "osm": "Gemeentehallen, 32, Brandweerstraat, Merelbeke, Merelbeke-Melle, Gent, Oost-Vlaanderen, Vlaanderen, 9820, België"
+  },
+  "Mortsel|Tafeltennisclub Tecemo": {
+    "lat": 51.17041,
+    "lon": 4.4567,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Mortsel",
+    "osm": "Mortsel, Antwerpen, Vlaanderen, 2640, België"
+  },
+  "Nijkerk|Hart van Holland": {
+    "lat": 52.2335,
+    "lon": 5.48472,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Hart van Holland, Nijkerk",
+    "osm": "Hart van Holland, 4, Berencamperweg, Zilverschoon/Oranjebuurt, Nijkerk, Gelderland, Nederland, 3861 LW, Nederland"
+  },
+  "Nijlen|Gildenzaal Nijlen": {
+    "lat": 51.1615,
+    "lon": 4.6719,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Gildenzaal Nijlen, Nijlen",
+    "osm": "Gildenzaal, 24, Gemeentestraat, Nijlen, Mechelen, Antwerpen, Vlaanderen, 2560, België"
+  },
+  "Oostkamp|Oostcampus": {
+    "lat": 51.14837,
+    "lon": 3.23537,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Oostcampus, Oostkamp",
+    "osm": "Oostcampus, Siemenslaan, Oostkamp, Brugge, West-Vlaanderen, Vlaanderen, 8020, België"
+  },
+  "Oss|Frans Heesen Stadion": {
+    "lat": 51.75503,
+    "lon": 5.52792,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Frans Heesen Stadion, Oss",
+    "osm": "Frans Heesen Stadion, Nelson Mandelaboulevard, Oss Zuid, Oss, Noord-Brabant, Nederland, 5342 CZ, Nederland"
+  },
+  "Oudenaarde|Qubus": {
+    "lat": 50.85637,
+    "lon": 3.60649,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Qubus, Oudenaarde",
+    "osm": "De Qubus, 45, Lindestraat, Bevere, Oudenaarde, Oost-Vlaanderen, Vlaanderen, 9700, België"
+  },
+  "Pijnacker|Winkelcentrum Pijnacker Centrum": {
+    "lat": 52.02006,
+    "lon": 4.43419,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Pijnacker",
+    "osm": "Pijnacker, Pijnacker-Nootdorp, Zuid-Holland, Nederland"
+  },
+  "Purmerend|Sporthal De Spurd": {
+    "lat": 52.50248,
+    "lon": 4.96148,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Purmerend",
+    "osm": "Purmerend, Noord-Holland, Nederland"
+  },
+  "Purmerend|The Cardboard Collector": {
+    "lat": 52.50248,
+    "lon": 4.96148,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Purmerend",
+    "osm": "Purmerend, Noord-Holland, Nederland"
+  },
+  "Ranst|GC Den Boomgaard": {
+    "lat": 51.1897,
+    "lon": 4.5633,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Ranst",
+    "osm": "Ranst, Malle, Antwerpen, Vlaanderen, 2520, België"
+  },
+  "Riemst|'t Paenhuys": {
+    "lat": 50.81016,
+    "lon": 5.60351,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "'t Paenhuys, Riemst",
+    "osm": "Zaal 't Paenhuys, Eyckendael, Riemst, Tongeren, Limburg, Vlaanderen, 3770, België"
+  },
+  "Rijen|Cultureel Centrum De Boodschap": {
+    "lat": 51.58935,
+    "lon": 4.9073,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Cultureel Centrum De Boodschap, Rijen",
+    "osm": "Cultureel Centrum de Boodschap, 62, Nassaulaan, Achter het gemeentehuis, Vijf Eiken, Rijen, Gilze en Rijen, Noord-Brabant, Nederland, 5121 BC, Nederland"
+  },
+  "Rijnsburg|De Voorhof": {
+    "lat": 52.19171,
+    "lon": 4.44347,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Voorhof, Rijnsburg",
+    "osm": "De Voorhof, Vliet Noordzijde, De Horn, Rijnsburg, Katwijk, Zuid-Holland, Nederland, 2231 GN, Nederland"
+  },
+  "Rijswijk|Event Plaza": {
+    "lat": 52.03169,
+    "lon": 4.33108,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Event Plaza, Rijswijk",
+    "osm": "Event Plaza, 86, Lange Kleiweg, Rijswijk, Zuid-Holland, Nederland, 2288 GR, Nederland"
+  },
+  "Roelofarendsveen|Hal 60": {
+    "lat": 52.20272,
+    "lon": 4.63124,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Roelofarendsveen",
+    "osm": "Roelofarendsveen, Kaag en Braassem, Zuid-Holland, Nederland"
+  },
+  "Roeselare|Roeselare Expohallen": {
+    "lat": 50.94495,
+    "lon": 3.12439,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Roeselare",
+    "osm": "Roeselare, West-Vlaanderen, Vlaanderen, 8800, België"
+  },
+  "Rosmalen|Autotron Rosmalen": {
+    "lat": 51.71199,
+    "lon": 5.41823,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Autotron Rosmalen, Rosmalen",
+    "osm": "Autotron Rosmalen, 133, Graafsebaan, Het Vinkel, Rosmalen, 's-Hertogenbosch, Noord-Brabant, Nederland, 5248 NL, Nederland"
+  },
+  "Rotterdam|Rotterdam Ahoy": {
+    "lat": 51.8833,
+    "lon": 4.48837,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Rotterdam Ahoy, Rotterdam",
+    "osm": "Rotterdam Ahoy, 10, Ahoyweg, Charlois, Rotterdam, Zuid-Holland, Nederland, 3084 BA, Nederland"
+  },
+  "Rotterdam|Van Nelle Fabriek": {
+    "lat": 51.92444,
+    "lon": 4.47775,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Rotterdam",
+    "osm": "Rotterdam, Zuid-Holland, Nederland"
+  },
+  "Rotterdam|Zevenkampse Ring hal": {
+    "lat": 51.92444,
+    "lon": 4.47775,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Rotterdam",
+    "osm": "Rotterdam, Zuid-Holland, Nederland"
+  },
+  "Scheemda|De Toekomst": {
+    "lat": 53.17024,
+    "lon": 6.99351,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Toekomst, Scheemda",
+    "osm": "De Toekomst II, Toekomstkade, Scheemdermeer, Scheemda, Oldambt, Groningen, Nederland, 9679 TT, Nederland"
+  },
+  "Sint-Niklaas|Broederschool Sint-Niklaas": {
+    "lat": 51.16265,
+    "lon": 4.13544,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Broederschool Sint-Niklaas, Sint-Niklaas",
+    "osm": "Broederschool, 75-91, Nieuwstraat, Kroonmolenwijk, Sint-Niklaas, Oost-Vlaanderen, Vlaanderen, 9100, België"
+  },
+  "Sint-Niklaas|Evenementenhal 't Bau-huis": {
+    "lat": 51.1687,
+    "lon": 4.10193,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Sint-Niklaas",
+    "osm": "Sint-Niklaas, Oost-Vlaanderen, Vlaanderen, België"
+  },
+  "Sint-Truiden|HANGAR 27 (H27)": {
+    "lat": 50.81528,
+    "lon": 5.18589,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Sint-Truiden",
+    "osm": "Sint-Truiden, Hasselt, Limburg, Vlaanderen, België"
+  },
+  "Stevoort|Zaal De Steborg": {
+    "lat": 50.91596,
+    "lon": 5.24708,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Stevoort",
+    "osm": "Stevoort, Hasselt, Limburg, Vlaanderen, 3512, België"
+  },
+  "Susteren|Gemeenschapshuis De Koppel": {
+    "lat": 51.06542,
+    "lon": 5.85189,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Susteren",
+    "osm": "Susteren, Echt-Susteren, Limburg, Nederland"
+  },
+  "Temse|Zaal De Leeuwerck": {
+    "lat": 51.13851,
+    "lon": 4.21646,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Temse",
+    "osm": "Temse, Sint-Niklaas, Oost-Vlaanderen, Vlaanderen, 9140, België"
+  },
+  "Tielt|Europahal Tielt": {
+    "lat": 51.00233,
+    "lon": 3.32758,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Europahal Tielt, Tielt",
+    "osm": "Europahal, 5;6;7, Generaal Maczekplein, Tielt, West-Vlaanderen, Vlaanderen, 8700, België"
+  },
+  "Tilburg|Koepelhal": {
+    "lat": 51.56091,
+    "lon": 5.09093,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Koepelhal, Tilburg",
+    "osm": "Wagenmakerij en Koepelhal, Burgemeester Brokxlaan, Tilburg Centrum, Oud-Noord, Tilburg, Noord-Brabant, Nederland, 5041 AX, Nederland"
+  },
+  "Torhout|De Mast": {
+    "lat": 51.07227,
+    "lon": 3.10236,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "De Mast, Torhout",
+    "osm": "De Mast, finse piste, Sint-Pieter, Torhout, Brugge, West-Vlaanderen, Vlaanderen, 8820, België"
+  },
+  "Turnhout|Futur": {
+    "lat": 51.32495,
+    "lon": 4.94288,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Futur, Turnhout",
+    "osm": "Futur, 6, Wezenstraat, Turnhout, Antwerpen, Vlaanderen, 2300, België"
+  },
+  "Utrecht|Jaarbeurs Utrecht": {
+    "lat": 52.08938,
+    "lon": 5.1096,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Jaarbeurs Utrecht, Utrecht",
+    "osm": "Utrecht Centraal, 12, Stationshal, Hoog Catharijne, Ns, Jaarbeurs, Binnenstad City- En Winkelgebied, Binnenstad, Utrecht, Nederland, 3511 CE, Nederland"
+  },
+  "Utrecht|Werkspoorkathedraal": {
+    "lat": 52.10514,
+    "lon": 5.07968,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Werkspoorkathedraal, Utrecht",
+    "osm": "Werkspoorkathedraal, Werkspoorpad, Schepenbuurt, Cartesiusweg E.o., Nieuw Engeland, Schepenbuurt, West, Utrecht, Nederland, 3534 AP, Nederland"
+  },
+  "Utrecht|ZIMIHC Theater Stefanus": {
+    "lat": 52.11866,
+    "lon": 5.10234,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "ZIMIHC Theater Stefanus, Utrecht",
+    "osm": "ZIMIHC theater Stefanus, 2, Braziliëdreef, Vechtzoom-Zuid, Vechtzoom, Klopvaart, Overvecht, Utrecht, Nederland, 3563 CK, Nederland"
+  },
+  "Valkenswaard|De Hijskraan": {
+    "lat": 51.36156,
+    "lon": 5.44613,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Hijskraan, Valkenswaard",
+    "osm": "De Hijskraan, 2, Seringenstraat, Het Gegraaf, Dommelen, Valkenswaard, Noord-Brabant, Nederland, 5552 NL, Nederland"
+  },
+  "Veenendaal|Sporthal West": {
+    "lat": 52.02826,
+    "lon": 5.53255,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Sporthal West, Veenendaal",
+    "osm": "Sporthal West, 72A, Veenslag, De Ellekoot, Veenendaal, Utrecht, Nederland, 3905 SL, Nederland"
+  },
+  "Venray|Schouwburg Venray": {
+    "lat": 51.52514,
+    "lon": 5.97371,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Schouwburg Venray, Venray",
+    "osm": "Schouwburg Venray, 1, Schouwburgplein, Centrum, Venray, Limburg, Nederland, 5801 BV, Nederland"
+  },
+  "Vijfhuizen|Expo Greater Amsterdam": {
+    "lat": 52.34181,
+    "lon": 4.67839,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Expo Greater Amsterdam, Vijfhuizen",
+    "osm": "EXPO Greater Amsterdam, 1, Floriadepark, Vijfhuizen, Haarlemmermeer, Noord-Holland, Nederland, 2141 ZZ, Nederland"
+  },
+  "Vleteren|OC De Sceure": {
+    "lat": 50.93014,
+    "lon": 2.72899,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Vleteren",
+    "osm": "Vleteren, Ieper, West-Vlaanderen, Vlaanderen, 8640, België"
+  },
+  "Voorschoten|De Vliethorst sporthal": {
+    "lat": 52.12572,
+    "lon": 4.44102,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Voorschoten",
+    "osm": "Voorschoten, Zuid-Holland, Nederland"
+  },
+  "Vosselaar|Gemeentehal Vosselaar": {
+    "lat": 51.31206,
+    "lon": 4.88916,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Gemeentehal Vosselaar, Vosselaar",
+    "osm": "Gemeentehal, 3, Maurits Pottersstraat, Vosselaar, Turnhout, Antwerpen, Vlaanderen, 2350, België"
+  },
+  "Waalre|Sporthal ‘t Hazzo": {
+    "lat": 51.38567,
+    "lon": 5.46612,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Waalre",
+    "osm": "Waalre, Noord-Brabant, Nederland"
+  },
+  "Waregem|": {
+    "lat": 50.88682,
+    "lon": 3.43236,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Waregem",
+    "osm": "Waregem, Kortrijk, West-Vlaanderen, Vlaanderen, België"
+  },
+  "Waregem|Blitz Entertainment Store Waregem": {
+    "lat": 50.8843,
+    "lon": 3.42662,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Blitz Entertainment Store Waregem, Waregem",
+    "osm": "Blitz Entertainment Store, 147, Stormestraat, Ten Hede, Waregem, Kortrijk, West-Vlaanderen, Vlaanderen, 8790, België"
+  },
+  "Waregem|Waregem Expo": {
+    "lat": 50.88097,
+    "lon": 3.42681,
+    "precisie": "venue",
+    "land": "BE",
+    "query": "Waregem Expo, Waregem",
+    "osm": "Waregem Expo, 26, Zuiderlaan, Ten Hede, Waregem, Kortrijk, West-Vlaanderen, Vlaanderen, 8790, België"
+  },
+  "Wateringen|Velo sporthal": {
+    "lat": 52.02351,
+    "lon": 4.27459,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Wateringen",
+    "osm": "Wateringen, Westland, Zuid-Holland, Nederland"
+  },
+  "Zaltbommel|De Sportwaard": {
+    "lat": 51.80325,
+    "lon": 5.2573,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "De Sportwaard, Zaltbommel",
+    "osm": "De Sportwaard, 6, Oude Bosscheweg, Zaltbommel, Gelderland, Nederland, 5301 LA, Nederland"
+  },
+  "Zandvliet|Antwerp Collector Fest": {
+    "lat": 51.35997,
+    "lon": 4.30868,
+    "precisie": "city",
+    "land": "BE",
+    "query": "Zandvliet",
+    "osm": "Zandvliet, Berendrecht-Zandvliet-Lillo, Antwerpen, Vlaanderen, België"
+  },
+  "Zoeterwoude|Ons Huis": {
+    "lat": 52.12056,
+    "lon": 4.49723,
+    "precisie": "venue",
+    "land": "NL",
+    "query": "Ons Huis, Zoeterwoude",
+    "osm": "Ons Huis, 3, Kosterspad, Zoeterwoude-Dorp, Zoeterwoude, Zuid-Holland, Nederland, 2381 BN, Nederland"
+  },
+  "Zwolle|Sporthal Landstede - ZBC hal": {
+    "lat": 52.50898,
+    "lon": 6.09438,
+    "precisie": "city",
+    "land": "NL",
+    "query": "Zwolle",
+    "osm": "Zwolle, Overijssel, Nederland"
+  }
+}

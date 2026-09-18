@@ -1,0 +1,16 @@
+{
+  "name": "kaartjeskaart",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pokémon-kaartenbeurzen in Nederland en België op één kaart",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node scripts/test-parse.mjs",
+    "refresh": "node scripts/refresh.mjs",
+    "refresh:lokaal": "node scripts/refresh.mjs --uit sample-index.md",
+    "start": "npx --yes serve public"
+  }
+}

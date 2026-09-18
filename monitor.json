@@ -1,0 +1,42 @@
+{
+  "name": "Kaartjeskaart — pokeradar agenda",
+  "schedule": { "text": "every day at 06:00", "timezone": "Europe/Amsterdam" },
+  "targets": [
+    {
+      "type": "scrape",
+      "urls": ["https://www.pokeradar.nl/evenement"],
+      "scrapeOptions": {
+        "formats": [
+          {
+            "type": "changeTracking",
+            "modes": ["json"],
+            "prompt": "Lees de zin bovenaan de agenda die begint met 'Leuk weetje' en die vertelt hoeveel evenementdagen er op de agenda staan. Geef alleen die twee getallen terug.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "totaal_evenementdagen": {
+                  "type": "number",
+                  "description": "Het totale aantal evenementdagen op de gehele agenda."
+                },
+                "evenementdagen_dit_jaar": {
+                  "type": "number",
+                  "description": "Het aantal evenementdagen dat nog dit kalenderjaar plaatsvindt."
+                }
+              },
+              "required": ["totaal_evenementdagen"]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "_opmerking": "Het echte ontvangeradres staat op de monitor zelf, niet hier — deze repo is openbaar. Aanpassen doe je met: firecrawl monitor update <id> - <<< '{\"notification\":{\"email\":{\"enabled\":true,\"recipients\":[\"jij@voorbeeld.nl\"],\"includeDiffs\":true}}}'",
+  "notification": {
+    "email": {
+      "enabled": true,
+      "recipients": ["jij@voorbeeld.nl"],
+      "includeDiffs": true
+    }
+  },
+  "retentionDays": 30
+}

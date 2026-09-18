@@ -1,7 +1,3 @@
-/* ---------------------------------------------------------------
-   Kaartjeskaart — donker thema standaard, licht thema via de knop
-   of het systeem. Alles in tokens zodat beide thema's gelijk lopen.
-   --------------------------------------------------------------- */
 
 :root {
   /* Stuurt de standaardopmaak van formulierelementen (vinkjes, scrollbars,
@@ -827,26 +823,50 @@ a { color: inherit; }
 }
 .pop-zaal::before { content: " · "; }
 
-/* Feiten als gewone regel tekst met een icoontje ervoor, in plaats van
-   blokjes in een grijze balk. */
+/* De openingstijd is waarvoor je dit kaartje opent, dus die krijgt de meeste
+   ruimte van allemaal. Grote cijfers in vaste breedte, zodat 10:00 en 11:00
+   onder elkaar uitlijnen als je door de spelden klikt. */
+.pop-tijd { margin-top: 13px; }
+.pop-tijd-groot {
+  display: block;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--tekst);
+}
+.pop-tijd-groot .tot {
+  color: var(--tekst-flauw);
+  font-weight: 400;
+  margin: 0 .18em;
+}
+.pop-tijd-bij {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--tekst-zacht);
+}
+
+/* Hoe groot en hoe ingeburgerd: twee getallen die helpen kiezen, maar die
+   niet met de openingstijd om aandacht hoeven te vechten. */
 .pop-feiten {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 14px;
-  margin-top: 11px;
+  gap: 4px 16px;
+  margin-top: 10px;
   font-size: 13px;
   color: var(--tekst);
 }
 .feit { display: inline-flex; align-items: center; gap: 6px; }
 .feit .ic { color: var(--tekst-zacht); }
 
-/* Eén rij etiketten: soort, voorzieningen en socials delen dezelfde vorm,
-   want het zijn allemaal korte labels bij dit evenement. */
+/* Soort en voorzieningen: alles wat deze beurs kenmerkt, bij elkaar. */
 .pop-etiketten {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .etiket {
@@ -906,7 +926,18 @@ a { color: inherit; }
 
 .social { text-decoration: none; }
 .social:hover { background: color-mix(in oklab, var(--vlak-hoog) 70%, var(--tekst)); }
-.pop-socials { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
+/* De socials staan onderin bij de knoppen, want het zijn links naar de
+   organisator en geen kenmerk van de beurs. Eigen regel, gescheiden door
+   een lijntje, en intern niet afbrekend zodat ze bij elkaar blijven. */
+.pop-socials {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  padding-top: 10px;
+  margin-top: 2px;
+  border-top: 1px solid var(--rand);
+}
 
 .pop-tekst { margin-top: 12px; }
 .pop-tekst summary {
@@ -955,17 +986,24 @@ a { color: inherit; }
 .pop-reis .ic { color: var(--tekst-zacht); }
 .pop-reis.is-echt { color: var(--tekst); }
 
-.pop-knoppen { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Even breed, ongeacht hoeveel het er zijn. Een raster met gelijke kolommen
+   doet dat vanzelf, terwijl flex ze op hun tekstlengte laat verschillen —
+   en dan staat "Website" naast een dubbel zo brede "Pokeradar". */
+.pop-knoppen {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+}
 
 .pop-knop {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  flex: 1 1 auto;
-  min-width: fit-content;
-  height: 34px;
-  padding: 0 13px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
   border-radius: calc(var(--radius) - 2px);
   border: 1px solid transparent;
   font-size: 13px;
@@ -979,14 +1017,6 @@ a { color: inherit; }
 .pop-knop-hoofd .ic { opacity: .7; }
 .pop-knop-zacht { border-color: var(--rand); color: var(--tekst); }
 .pop-knop-zacht:hover { background: var(--vlak-hoog); }
-
-.pop-bron {
-  margin: 0;
-  font-size: 11px;
-  color: var(--tekst-zacht);
-  text-align: center;
-  opacity: .8;
-}
 
 .leaflet-control-attribution {
   background: color-mix(in srgb, var(--vlak) 88%, transparent) !important;

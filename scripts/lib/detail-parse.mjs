@@ -65,6 +65,12 @@ export function parseDetail(markdown) {
     tickets: jaNee(pak(/(Ja|Nee)\s*\[?\s*Tickets/i)),
     eten: jaNee(pak(/(Ja|Nee)\s*Eten\s*&?\s*drinken/i)),
     parkeren: jaNee(pak(/(Ja|Nee)\s*Gratis\s*Parkeren/i)),
+    // Hoeveel kramen er staan, oftewel hoe groot de beurs is. Staat op drie
+    // van de vier pagina's en zegt meer over een bezoek dan de meeste
+    // andere velden. Blijft tekst, want er staat regelmatig "70+" — dat
+    // "of meer" is informatie die je niet moet wegronden.
+    tafels: pak(/(\d+\s*\+?)\s*Tafels\s*\/?\s*stands/i)?.replace(/\s+/g, '') ?? null,
+    gratisEntree: jaNee(pak(/(Ja|Nee)\s*\[?\s*Gratis entree/i)),
     edities: Number(pak(/(\d+)\s*\[?\s*Edities/i)) || null,
     ticketsUrl: markdown.match(/\[Tickets\]\((https:\/\/[^)\s]+\/tickets)\)/)?.[1] ?? null,
     afbeelding,

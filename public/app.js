@@ -324,6 +324,17 @@ function feitHtml(naam, tekst) {
   return `<span class="feit">${icoon(naam, 13)}${ontsnap(tekst)}</span>`;
 }
 
+/** "6 uur open", of "5,5 uur open" als het geen heel getal is. */
+function duurTekst(van, tot) {
+  const [vu, vm] = van.split(':').map(Number);
+  const [tu, tm] = tot.split(':').map(Number);
+  let minuten = (tu * 60 + tm) - (vu * 60 + vm);
+  if (minuten <= 0) minuten += 24 * 60; // loopt door na middernacht
+  const uren = minuten / 60;
+  const netjes = Number.isInteger(uren) ? String(uren) : uren.toFixed(1).replace('.', ',');
+  return `${netjes} uur open`;
+}
+
 /* Lijniconen uit Lucide, dezelfde set die shadcn gebruikt. Emoji leken
    handig maar verraden zich meteen: ze hebben elk hun eigen stijl, kleur en
    regelhoogte, en op Windows rendert de helft als een leeg blokje. Deze
@@ -334,6 +345,7 @@ const ICONEN = {
   ticket: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
   eten: '<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>',
   parkeren: '<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+  kraam: '<path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/>',
   auto: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
   vink: '<path d="M20 6 9 17l-5-5"/>',
   pijlRechts: '<path d="m9 18 6-6-6-6"/>',
@@ -389,29 +401,45 @@ function popupHtml(e) {
   if (e.viptijd) meta.push(`<span class="etiket">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
   if (e.geannuleerd) meta.push('<span class="etiket is-af">Geannuleerd</span>');
 
-  // De socials zitten in een eigen groepje dat intern niet afbreekt, zodat
-  // ze altijd netjes op één regel bij elkaar blijven staan.
-  if (org?.socials?.length) {
-    const knopjes = org.socials
-      .map((s) => {
-        const logo = merkLogo(s.platform);
-        // Kennen we het logo niet, dan maar de naam voluit — beter dan een
-        // leeg vakje.
-        const binnenkant = logo ?? `<span aria-hidden="true">${ontsnap(s.platform)}</span>`;
-        return `<a class="etiket social${logo ? ' etiket-kaal' : ''}" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow"
-          title="${ontsnap(s.platform)}"><span class="vb">${ontsnap(s.platform)}</span>${binnenkant}</a>`;
-      })
-      .join('');
-    meta.push(`<span class="pop-socials">${knopjes}</span>`);
-  }
+  // De socials horen niet tussen de etiketten: die beschrijven de beurs, en
+  // dit zijn links naar de organisator. Ze staan dus onderin bij de knoppen,
+  // als eigen groepje.
+  const socials = (org?.socials ?? [])
+    .map((s) => {
+      const logo = merkLogo(s.platform);
+      // Kennen we het logo niet, dan maar de naam voluit — beter dan een
+      // leeg vakje.
+      const binnenkant = logo ?? `<span aria-hidden="true">${ontsnap(s.platform)}</span>`;
+      return `<a class="etiket social${logo ? ' etiket-kaal' : ''}" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow"
+        title="${ontsnap(s.platform)}"><span class="vb">${ontsnap(s.platform)}</span>${binnenkant}</a>`;
+    })
+    .join('');
 
-  // Begin- en eindtijd horen bij elkaar, dus staan ze als één bereik. Twee
-  // losse blokjes met elk een eigen bijschrift zeiden niet meer.
+  // De openingstijd is waar je een kaartje voor opent, dus die krijgt de
+  // meeste ruimte. Met de duur erbij, want "10:00 – 16:00" laat je zelf
+  // rekenen hoelang je hebt.
+  // Lang niet elke beurs vult alles in. Wat ontbreekt laten we weg in plaats
+  // van er "onbekend" neer te zetten: een kaartje moet er ook compleet
+  // uitzien als de helft van de velden leeg is.
+  const bijTijd = [
+    d?.eindtijd ? duurTekst(e.tijd, d.eindtijd) : null,
+    e.viptijd ? `VIP vanaf ${e.viptijd}` : null,
+  ].filter(Boolean).join(' · ');
+
+  const tijdBlok = e.tijd
+    ? `<div class="pop-tijd">
+         <span class="pop-tijd-groot">${ontsnap(e.tijd)}${d?.eindtijd ? `<span class="tot">–</span>${ontsnap(d.eindtijd)}` : ''}</span>
+         ${bijTijd ? `<span class="pop-tijd-bij">${ontsnap(bijTijd)}</span>` : ''}
+       </div>`
+    : '';
+
+  // Hoe groot en hoe ingeburgerd: twee getallen die helpen kiezen.
   const feiten = [];
-  if (e.tijd) feiten.push(feitHtml('klok', d?.eindtijd ? `${e.tijd} – ${d.eindtijd}` : `vanaf ${e.tijd}`));
+  if (d?.tafels) feiten.push(feitHtml('kraam', `${d.tafels} stands`));
   if (d?.edities) feiten.push(feitHtml('kalender', `${d.edities}e editie`));
 
   const voorzieningen = [
+    voorzieningHtml(d?.gratisEntree, 'Gratis entree', 'ticket'),
     voorzieningHtml(d?.tickets, 'Tickets', 'ticket'),
     voorzieningHtml(d?.eten, 'Eten & drinken', 'eten'),
     voorzieningHtml(d?.parkeren, 'Gratis parkeren', 'parkeren'),
@@ -419,7 +447,7 @@ function popupHtml(e) {
 
   // Alle knoppen op één regel, die afbreekt als er geen ruimte meer is.
   const knoppen = [
-    `<a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Pokeradar${icoon('extern', 13)}</a>`,
+    `<a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Pokeradar</a>`,
   ];
   if (org?.website) {
     knoppen.push(`<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website</a>`);
@@ -447,7 +475,11 @@ function popupHtml(e) {
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
         <p class="pop-plaats">${ontsnap(e.stad)}${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}</p>
 
+        ${tijdBlok}
         ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
+
+        <!-- Soort en voorzieningen bij elkaar: allemaal kenmerken van deze
+             beurs. De socials zitten onderin, want dat zijn links. -->
         ${meta.length || voorzieningen ? `<div class="pop-etiketten">${meta.join('')}${voorzieningen}</div>` : ''}
         ${d?.beschrijving ? `<details class="pop-tekst"><summary>${icoon('pijlRechts', 12)}Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
       </div>
@@ -455,7 +487,7 @@ function popupHtml(e) {
       ${reis || knoppen.length ? `<div class="pop-voet">
         ${reis}
         <div class="pop-knoppen">${knoppen.join('')}</div>
-        ${e.precisie === 'city' ? '<p class="pop-bron">Speld staat op het centrum van de plaats</p>' : ''}
+        ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
       </div>` : ''}
     </div>`;
 }

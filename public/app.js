@@ -139,6 +139,7 @@ let details = null;       // extra gegevens, worden na het eerste tekenen gelade
 let mijnLocatie = null;   // {lat, lon}
 let mijnSpeld = null;
 let sorteerOpAfstand = false;
+let lijstIsVerouderd = false; // lijst overgeslagen omdat hij niet in beeld stond
 let kaart;
 let tegellaag;
 let clusters;
@@ -242,8 +243,23 @@ function maakKaart() {
     // wordt dan het venster. De grenzen houden je bovendien in de buurt.
     minZoom: 6,
     maxBounds: L.latLngBounds([44.5, -11], [59.5, 21]),
-    maxBoundsViscosity: 0.7,
+    // Volledig stug in plaats van half: aan de rand stopt de kaart gewoon.
+    // Een waarde ertussenin laat hem meeveren en terugspringen, en dat voelt
+    // alsof het slepen hapert terwijl er niets hapert.
+    maxBoundsViscosity: 1,
     worldCopyJump: false,
+
+    /* Knijpzoomen laat de kaart vloeiend meeschalen, maar standaard springt
+       hij bij het loslaten naar het dichtstbijzijnde hele zoomniveau. Met
+       `zoomSnap: 0` blijft hij staan waar je hem loslaat. De knoppen en het
+       scrollwiel stappen wél met hele niveaus, via `zoomDelta`.
+       `bounceAtZoomLimits` uit: bij de grens stopt hij, in plaats van terug
+       te stuiteren. */
+    zoomSnap: 0,
+    zoomDelta: 1,
+    bounceAtZoomLimits: false,
+    // Standaard is 60, waardoor één muiswielstapje al een heel niveau springt.
+    wheelPxPerZoomLevel: 120,
   });
 
   const thema = document.documentElement.dataset.thema;
@@ -254,6 +270,19 @@ function maakKaart() {
     maxNativeZoom: TEGEL_MAXZOOM,
     maxZoom: 18,
     noWrap: true,
+
+    /* Deze drie bepalen hoe vlot de kaart aanvoelt.
+       Leaflet zet `updateWhenIdle` op telefoons standaard aan: er worden dan
+       pas tegels opgehaald als je je vinger optilt, dus sleep je het lege
+       grijs in. Dat scheelt dataverkeer maar voelt traag terwijl de kaart
+       zelf prima meebeweegt — vandaar uit.
+       Met een ruimere buffer staan de tegels net buiten beeld al klaar, zodat
+       je er niet meteen doorheen sleept.
+       Tijdens het in- en uitzoomen juist niet bijwerken: dat haalt werk weg
+       uit de animatie en laat hem vloeiender lopen. */
+    updateWhenIdle: false,
+    updateWhenZooming: false,
+    keepBuffer: 4,
   }).addTo(kaart);
 
   clusters = L.markerClusterGroup({
@@ -506,19 +535,34 @@ function tekenSpelden() {
 
 function tekenLijst() {
   const lijst = $('#lijst');
-  let rijen = zichtbaar;
 
+  let rijen = zichtbaar;
   if (filters.inBeeld && kaart) {
     const kader = kaart.getBounds();
     rijen = rijen.filter((e) => kader.contains([e.lat, e.lon]));
   }
 
+  // Het aantal staat op de knop waarmee je naar de lijst wisselt, dus dat
+  // moet ook kloppen als de lijst zelf niet in beeld staat.
   $('#mobielTelling').textContent = rijen.length ? `(${rijen.length})` : '';
+
+  // Op een telefoon in kaartweergave staat de lijst niet in beeld. Hem dan
+  // toch bij elke kaartbeweging opnieuw opbouwen is werk voor niemand; we
+  // onthouden dat het nog moet gebeuren en doen het bij het omschakelen.
+  if (!lijst.offsetParent) { lijstIsVerouderd = true; return; }
+  lijstIsVerouderd = false;
+
+  // De lijst wordt in zijn geheel opnieuw opgebouwd, en dat zet de
+  // scrolpositie terug naar boven. Bij "alleen in beeld" gebeurt dat na
+  // iedere kaartbeweging, dus dan springt de lijst telkens omhoog terwijl je
+  // aan het kijken bent.
+  const scrolpositie = lijst.scrollTop;
 
   if (!rijen.length) {
     lijst.innerHTML = `<div class="leeg"><b>Niks gevonden</b>Probeer een langere periode, of zet een filter uit.</div>`;
     return;
   }
+
 
   /** Eén rij in de lijst. `metDatum` zet de datum in de rij zelf, voor als
       er niet per dag gegroepeerd wordt. */
@@ -581,6 +625,7 @@ function tekenLijst() {
   }
 
   lijst.innerHTML = stukken.join('');
+  lijst.scrollTop = scrolpositie;
 }
 
 /**
@@ -930,6 +975,8 @@ function zetWeergave(welke) {
     b.classList.toggle('is-actief', b.dataset.weergave === welke);
   }
   if (welke === 'kaart' && kaart) requestAnimationFrame(() => kaart.invalidateSize());
+  // De lijst is ondertussen misschien niet bijgewerkt omdat hij verborgen was.
+  if (welke === 'lijst' && lijstIsVerouderd) tekenLijst();
 }
 
 /* ---------- opstarten ---------- */

@@ -8,16 +8,29 @@
      de keuzelijst) mee met het thema. */
   color-scheme: dark;
 
-  --bg: #0e1116;
-  --vlak: #161b22;
-  --vlak-hoog: #1d232c;
-  --rand: #262d38;
-  --rand-zacht: #1e242d;
-  --tekst: #e9eef5;
-  --tekst-zacht: #97a3b4;
-  --tekst-flauw: #6b7687;
-  --accent: #ff5a4e;
-  --accent-tekst: #fff;
+  /* Het grijs komt uit shadcn (thema "zinc"), letterlijk uit hun registry
+     overgenomen. De kern ervan: --accent is bijna-wit in het donker en
+     bijna-zwart in het licht — dus geen kleur. Kleur is voorbehouden aan
+     dingen die iets betekenen, en dat is bij een knop of een aangevinkt
+     filter zelden zo. */
+  --bg: oklch(0.141 0.005 285.823);
+  --vlak: oklch(0.21 0.006 285.885);
+  --vlak-hoog: oklch(0.274 0.006 286.033);
+  --rand: oklch(1 0 0 / 10%);
+  --rand-zacht: oklch(1 0 0 / 6%);
+  --tekst: oklch(0.985 0 0);
+  --tekst-zacht: oklch(0.705 0.015 286.067);
+  --tekst-flauw: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.92 0.004 286.32);
+  --accent-tekst: oklch(0.21 0.006 285.885);
+  --waarschuwing: oklch(0.704 0.191 22.216);
+
+  /* Het merkbolletje houdt zijn eigen rood: dat is het logo, geen besturing. */
+  --merk: #ff5a4e;
+
+  --radius: 0.625rem;
+
+  /* Dringendheid op de kaart. Dit is data, geen chroom, dus die houdt kleur. */
   --vandaag: #ff4d4d;
   --week: #ffa62b;
   --maand: #35c1f1;
@@ -42,34 +55,23 @@
   --kop-h: 58px;
   --paneel-b: 384px;
 
-  /* De kleurenset van shadcn (thema "zinc"), letterlijk overgenomen.
-     Het opvallendste eraan: --sc-primair is bijna-wit in het donker en
-     bijna-zwart in het licht. Geen kleur dus. Kleur is voorbehouden aan
-     dingen die je moet opvallen, en dat is bijna nooit een knop.
-     Voorlopig alleen in gebruik bij het beurskaartje. */
-  --sc-kaart: oklch(0.21 0.006 285.885);
-  --sc-tekst: oklch(0.985 0 0);
-  --sc-zacht: oklch(0.274 0.006 286.033);
-  --sc-zacht-tekst: oklch(0.705 0.015 286.067);
-  --sc-rand: oklch(1 0 0 / 10%);
-  --sc-primair: oklch(0.92 0.004 286.32);
-  --sc-primair-tekst: oklch(0.21 0.006 285.885);
-  --sc-waarschuwing: oklch(0.704 0.191 22.216);
-  --sc-radius: 0.625rem;
 }
 
 :root[data-thema="licht"] {
   color-scheme: light;
 
-  --bg: #f4f6f9;
-  --vlak: #ffffff;
-  --vlak-hoog: #f0f3f7;
-  --rand: #dde3ec;
-  --rand-zacht: #e7ecf3;
-  --tekst: #141a22;
-  --tekst-zacht: #57657a;
-  --tekst-flauw: #8592a4;
-  --accent: #e33f33;
+  --bg: oklch(0.985 0 0);
+  --vlak: oklch(1 0 0);
+  --vlak-hoog: oklch(0.967 0.001 286.375);
+  --rand: oklch(0.92 0.004 286.32);
+  --rand-zacht: oklch(0.945 0.004 286.32);
+  --tekst: oklch(0.141 0.005 285.823);
+  --tekst-zacht: oklch(0.552 0.016 285.938);
+  --tekst-flauw: oklch(0.646 0.015 286);
+  --accent: oklch(0.21 0.006 285.885);
+  --accent-tekst: oklch(0.985 0 0);
+  --waarschuwing: oklch(0.577 0.245 27.325);
+
   --vandaag: #e0322f;
   --week: #d97b06;
   --maand: #0d82b8;
@@ -88,14 +90,6 @@
   --soort-0: #7a8699;
   --schaduw: 0 4px 18px rgb(18 28 45 / .12);
 
-  --sc-kaart: oklch(1 0 0);
-  --sc-tekst: oklch(0.141 0.005 285.823);
-  --sc-zacht: oklch(0.967 0.001 286.375);
-  --sc-zacht-tekst: oklch(0.552 0.016 285.938);
-  --sc-rand: oklch(0.92 0.004 286.32);
-  --sc-primair: oklch(0.21 0.006 285.885);
-  --sc-primair-tekst: oklch(0.985 0 0);
-  --sc-waarschuwing: oklch(0.577 0.245 27.325);
 }
 
 * { box-sizing: border-box; }
@@ -152,7 +146,7 @@ a { color: inherit; }
 
 .merk-bal {
   width: 26px; height: 26px; border-radius: 50%;
-  background: var(--accent);
+  background: var(--merk);
   position: relative;
   flex: 0 0 auto;
   box-shadow: inset 0 0 0 2.5px var(--vlak), 0 0 0 1px var(--rand);
@@ -165,7 +159,7 @@ a { color: inherit; }
   content: ""; position: absolute; left: 50%; top: 50%;
   width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
   border-radius: 50%; background: var(--vlak);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: inset 0 0 0 2px var(--merk);
 }
 
 .kop h1 {
@@ -534,25 +528,6 @@ a { color: inherit; }
   margin-bottom: 3px;
 }
 
-/* ---------- klikbare typetags ---------- */
-
-.pil-tag {
-  font: inherit;
-  font-size: 10.5px;
-  line-height: 1.5;
-  cursor: pointer;
-  color: var(--tekst-zacht);
-  transition: background .12s, color .12s, border-color .12s;
-}
-.pil-tag:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
-.pil-tag.is-actief {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-tekst);
-  font-weight: 600;
-}
-.pil-icoon { padding: 1.5px 5px; cursor: default; }
-
 /* De legenda is geen besturing maar een sleutel, dus staat hij onderaan,
    afgescheiden door een lijntje en in een kleinere letter. In soortmodus is
    hij wél aanklikbaar, en dat mag je aan de knopvorm zien. */
@@ -673,17 +648,6 @@ a { color: inherit; }
   font-size: 11px;
   color: var(--tekst-flauw);
 }
-.pil {
-  padding: 1.5px 7px;
-  border-radius: 999px;
-  background: var(--vlak-hoog);
-  border: 1px solid var(--rand);
-  font-size: 10.5px;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-.pil-af { background: color-mix(in srgb, var(--vandaag) 18%, transparent); border-color: color-mix(in srgb, var(--vandaag) 45%, transparent); color: var(--vandaag); font-weight: 600; }
-.pil-bij { background: color-mix(in srgb, var(--maand) 16%, transparent); border-color: color-mix(in srgb, var(--maand) 42%, transparent); color: var(--maand); }
 .tijd { font-variant-numeric: tabular-nums; }
 
 .leeg {
@@ -751,10 +715,10 @@ a { color: inherit; }
 /* ---------- popup ---------- */
 
 .leaflet-popup-content-wrapper {
-  background: var(--sc-kaart);
-  color: var(--sc-tekst);
-  border-radius: var(--sc-radius);
-  border: 1px solid var(--sc-rand);
+  background: var(--vlak);
+  color: var(--tekst);
+  border-radius: var(--radius);
+  border: 1px solid var(--rand);
   /* Twee zachte schaduwen over elkaar in plaats van één harde: dat is hoe
      shadcn een kaartje laat zweven zonder dat je de schaduw opmerkt. */
   box-shadow: 0 1px 3px rgb(0 0 0 / .1), 0 12px 32px -8px rgb(0 0 0 / .35);
@@ -762,7 +726,7 @@ a { color: inherit; }
   overflow: hidden;
   padding: 0;
 }
-.leaflet-popup-tip { background: var(--sc-kaart); border: 1px solid var(--sc-rand); }
+.leaflet-popup-tip { background: var(--vlak); border: 1px solid var(--rand); }
 /* De inhoud krijgt zelf geen marge meer: de beeldbalk moet tot de rand van
    het kaartje lopen, dus de witruimte zit per blok binnenin. */
 .leaflet-popup-content { margin: 0; width: 304px !important; max-height: 70vh; overflow-y: auto; }
@@ -779,14 +743,14 @@ a { color: inherit; }
   place-items: center;
   font-size: 17px;
   line-height: 1;
-  color: var(--sc-zacht-tekst);
-  background: color-mix(in oklab, var(--sc-kaart) 82%, transparent);
+  color: var(--tekst-zacht);
+  background: color-mix(in oklab, var(--vlak) 82%, transparent);
   backdrop-filter: blur(4px);
-  box-shadow: 0 0 0 1px var(--sc-rand);
+  box-shadow: 0 0 0 1px var(--rand);
 }
 .leaflet-container a.leaflet-popup-close-button:hover {
-  color: var(--sc-tekst);
-  background: var(--sc-zacht);
+  color: var(--tekst);
+  background: var(--vlak-hoog);
 }
 /* ---------------------------------------------------------------
    Het beurskaartje, opnieuw opgezet in de vormtaal van shadcn.
@@ -817,7 +781,7 @@ a { color: inherit; }
 .pop-beeld {
   aspect-ratio: 16 / 7;
   overflow: hidden;
-  background: var(--sc-zacht);
+  background: var(--vlak-hoog);
 }
 .pop-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -831,7 +795,7 @@ a { color: inherit; }
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
   margin-bottom: 6px;
 }
 .pop-wanneer { text-transform: none; letter-spacing: 0; font-weight: 400; }
@@ -842,14 +806,14 @@ a { color: inherit; }
   line-height: 1.25;
   letter-spacing: -.015em;
   margin: 0 0 4px;
-  color: var(--sc-tekst);
+  color: var(--tekst);
 }
 
 .pop-plaats {
   margin: 0;
   font-size: 13.5px;
   line-height: 1.45;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
 }
 .pop-zaal::before { content: " · "; }
 
@@ -861,10 +825,10 @@ a { color: inherit; }
   gap: 4px 14px;
   margin-top: 11px;
   font-size: 13px;
-  color: var(--sc-tekst);
+  color: var(--tekst);
 }
 .feit { display: inline-flex; align-items: center; gap: 6px; }
-.feit .ic { color: var(--sc-zacht-tekst); }
+.feit .ic { color: var(--tekst-zacht); }
 
 /* Eén rij etiketten: soort, voorzieningen en socials delen dezelfde vorm,
    want het zijn allemaal korte labels bij dit evenement. */
@@ -880,36 +844,58 @@ a { color: inherit; }
   align-items: center;
   gap: 4px;
   padding: 2.5px 8px;
-  border-radius: calc(var(--sc-radius) - 4px);
+  border-radius: calc(var(--radius) - 4px);
   border: 1px solid transparent;
-  background: var(--sc-zacht);
-  color: var(--sc-tekst);
+  background: var(--vlak-hoog);
+  color: var(--tekst);
   font-size: 11.5px;
   font-weight: 500;
   line-height: 1.45;
   white-space: nowrap;
 }
-.etiket .ic { color: var(--sc-zacht-tekst); }
+.etiket .ic { color: var(--tekst-zacht); }
 
 .etiket-knop { font: inherit; font-size: 11.5px; font-weight: 500; cursor: pointer; }
-.etiket-knop:hover { background: color-mix(in oklab, var(--sc-zacht) 70%, var(--sc-tekst)); }
+.etiket-knop:hover { background: color-mix(in oklab, var(--vlak-hoog) 70%, var(--tekst)); }
 
 /* Bekend maar afwezig: blijft staan, want "geen gratis parkeren" is ook
    iets waard als je met de auto komt. Wel gedempt. */
-.etiket.is-niet { background: none; border-color: var(--sc-rand); color: var(--sc-zacht-tekst); }
+.etiket.is-niet { background: none; border-color: var(--rand); color: var(--tekst-zacht); }
 .etiket.is-niet .ic { opacity: .55; }
 .etiket.is-niet::after { content: ": nee"; }
 
 /* De enige kleur in het hele kaartje. */
 .etiket.is-af {
   background: none;
-  border-color: color-mix(in oklab, var(--sc-waarschuwing) 45%, transparent);
-  color: var(--sc-waarschuwing);
+  border-color: color-mix(in oklab, var(--waarschuwing) 45%, transparent);
+  color: var(--waarschuwing);
   font-weight: 600;
 }
 
-.social { text-decoration: none; text-transform: uppercase; letter-spacing: .02em; }
-.social:hover { background: color-mix(in oklab, var(--sc-zacht) 70%, var(--sc-tekst)); }
+/* Een etiket zonder tekst: in de lijst is er geen ruimte voor het woord,
+   dus staat er alleen een icoontje met een tooltip. */
+.etiket-kaal { padding: 3px 6px; cursor: default; }
+
+/* Een aangeklikt soortfilter. Bijna-zwart in het licht en bijna-wit in het
+   donker — hetzelfde signaal als de hoofdknop, want het is hetzelfde soort
+   "dit staat aan". */
+.etiket-knop.is-actief {
+  background: var(--accent);
+  color: var(--accent-tekst);
+  font-weight: 600;
+}
+.etiket-knop.is-actief:hover { background: var(--accent); opacity: .9; }
+
+.tijd { font-variant-numeric: tabular-nums; }
+
+/* Merklogo's uit Simple Icons zijn gevulde vormen, geen lijntekeningen, dus
+   die krijgen `fill` in plaats van `stroke`. Eenkleurig gehouden: zes felle
+   merkkleuren naast elkaar zouden het kaartje weer bont maken, en twee van
+   de zes zijn zwart — onzichtbaar in het donkere thema. */
+.merk-ic { fill: currentColor; }
+
+.social { text-decoration: none; }
+.social:hover { background: color-mix(in oklab, var(--vlak-hoog) 70%, var(--tekst)); }
 .pop-socials { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
 
 .pop-tekst { margin-top: 12px; }
@@ -920,18 +906,18 @@ a { color: inherit; }
   cursor: pointer;
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
   list-style: none;
 }
 .pop-tekst summary::-webkit-details-marker { display: none; }
 .pop-tekst summary .ic { transition: transform .15s; }
 .pop-tekst[open] summary .ic { transform: rotate(90deg); }
-.pop-tekst summary:hover { color: var(--sc-tekst); }
+.pop-tekst summary:hover { color: var(--tekst); }
 .pop-tekst > div {
   margin-top: 8px;
   font-size: 12.5px;
   line-height: 1.6;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
   max-height: 170px;
   overflow-y: auto;
   padding-right: 6px;
@@ -942,7 +928,7 @@ a { color: inherit; }
 .pop-voet {
   margin-top: 14px;
   padding: 12px 16px 14px;
-  border-top: 1px solid var(--sc-rand);
+  border-top: 1px solid var(--rand);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -954,10 +940,10 @@ a { color: inherit; }
   gap: 8px;
   margin: 0;
   font-size: 12.5px;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
 }
-.pop-reis .ic { color: var(--sc-zacht-tekst); }
-.pop-reis.is-echt { color: var(--sc-tekst); }
+.pop-reis .ic { color: var(--tekst-zacht); }
+.pop-reis.is-echt { color: var(--tekst); }
 
 .pop-knoppen { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -970,7 +956,7 @@ a { color: inherit; }
   min-width: fit-content;
   height: 34px;
   padding: 0 13px;
-  border-radius: calc(var(--sc-radius) - 2px);
+  border-radius: calc(var(--radius) - 2px);
   border: 1px solid transparent;
   font-size: 13px;
   font-weight: 500;
@@ -978,16 +964,16 @@ a { color: inherit; }
   white-space: nowrap;
   transition: background-color .12s, border-color .12s;
 }
-.pop-knop-hoofd { background: var(--sc-primair); color: var(--sc-primair-tekst); }
-.pop-knop-hoofd:hover { background: color-mix(in oklab, var(--sc-primair) 90%, var(--sc-primair-tekst)); }
+.pop-knop-hoofd { background: var(--accent); color: var(--accent-tekst); }
+.pop-knop-hoofd:hover { background: color-mix(in oklab, var(--accent) 90%, var(--accent-tekst)); }
 .pop-knop-hoofd .ic { opacity: .7; }
-.pop-knop-zacht { border-color: var(--sc-rand); color: var(--sc-tekst); }
-.pop-knop-zacht:hover { background: var(--sc-zacht); }
+.pop-knop-zacht { border-color: var(--rand); color: var(--tekst); }
+.pop-knop-zacht:hover { background: var(--vlak-hoog); }
 
 .pop-bron {
   margin: 0;
   font-size: 11px;
-  color: var(--sc-zacht-tekst);
+  color: var(--tekst-zacht);
   text-align: center;
   opacity: .8;
 }

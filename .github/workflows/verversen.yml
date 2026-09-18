@@ -80,6 +80,17 @@ jobs:
           # De commit die 'verversen' zojuist duwde, moet meegenomen worden.
           ref: main
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # GitHub Pages laat app.js en styles.css tien minuten in de browsercache
+      # staan. Zonder inhoudshash in de naam draait een terugkerende bezoeker
+      # na een uitrol dus nog even de oude code. Dit stempelt alleen het
+      # artefact dat gepubliceerd wordt; de repo blijft schoon.
+      - name: Bestandsnamen stempelen tegen de cache
+        run: node scripts/stamp-assets.mjs
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

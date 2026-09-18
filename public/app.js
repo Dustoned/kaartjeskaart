@@ -241,10 +241,17 @@ function maakKaart() {
   kaart.on('popupclose', () => { zetGekozen(null, false); });
 }
 
-/** Het icoontje-met-label-blokje zoals pokeradar het onder een evenement zet. */
+/** Eén cijfer of tijdstip met een icoontje en een bijschrift eronder. */
 function feitHtml(icoon, waarde, label) {
   return `<div class="feit"><span class="feit-icoon" aria-hidden="true">${icoon}</span>
     <b>${ontsnap(waarde)}</b><span>${ontsnap(label)}</span></div>`;
+}
+
+/** Een ja/nee-voorziening. Niets bekend? Dan laten we hem weg. */
+function voorzieningHtml(aan, label) {
+  if (aan === null || aan === undefined) return '';
+  return `<span class="voorziening${aan ? '' : ' is-niet'}">
+    <span class="vink" aria-hidden="true">${aan ? '✓' : '✕'}</span>${ontsnap(label)}</span>`;
 }
 
 function popupHtml(e) {
@@ -254,44 +261,67 @@ function popupHtml(e) {
   const org = details?.organisatoren?.[`${e.naam}|${e.stad}`];
   const km = afstandTot(e);
 
+  const afbeelding = e.afbeelding ?? d?.afbeelding ?? null;
+
   const meta = [];
   if (e.type) meta.push(`<button type="button" class="pil pil-tag" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
   if (e.viptijd) meta.push(`<span class="pil tijd">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
   if (e.geannuleerd) meta.push('<span class="pil pil-af">Geannuleerd</span>');
 
-  // De kerngegevens van de detailpagina.
+  // Cijfers en tijdstippen in een raster, ja/nee-zaken eronder als vinkjes.
+  // Dat scheelt ruimte en leest sneller dan zes blokjes met "Ja" erin.
   const feiten = [];
-  if (e.tijd) feiten.push(feitHtml('🕐', `${e.tijd} uur`, 'Begintijd'));
-  if (d?.eindtijd) feiten.push(feitHtml('🕓', `${d.eindtijd} uur`, 'Eindtijd'));
-  if (d?.tickets !== null && d?.tickets !== undefined) feiten.push(feitHtml('🎟️', d.tickets ? 'Ja' : 'Nee', 'Tickets'));
-  if (d?.eten !== null && d?.eten !== undefined) feiten.push(feitHtml('🍟', d.eten ? 'Ja' : 'Nee', 'Eten & drinken'));
-  if (d?.parkeren !== null && d?.parkeren !== undefined) feiten.push(feitHtml('🅿️', d.parkeren ? 'Ja' : 'Nee', 'Gratis parkeren'));
-  if (d?.edities) feiten.push(feitHtml('📅', String(d.edities), 'Edities totaal'));
+  if (e.tijd) feiten.push(feitHtml('🕐', e.tijd, 'Begintijd'));
+  if (d?.eindtijd) feiten.push(feitHtml('🕓', d.eindtijd, 'Eindtijd'));
+  if (d?.edities) feiten.push(feitHtml('📅', String(d.edities), 'Edities'));
+
+  const voorzieningen = [
+    voorzieningHtml(d?.tickets, 'Tickets'),
+    voorzieningHtml(d?.eten, 'Eten & drinken'),
+    voorzieningHtml(d?.parkeren, 'Gratis parkeren'),
+  ].filter(Boolean).join('');
 
   const socials = (org?.socials ?? [])
     .map((s) => `<a class="social" href="${ontsnap(s.url)}" target="_blank" rel="noopener noreferrer nofollow">${ontsnap(s.platform)}</a>`)
     .join('');
 
-  const route = mijnLocatie
-    ? `<a class="pop-knop pop-knop-zacht" target="_blank" rel="noopener noreferrer"
-         href="https://www.google.com/maps/dir/?api=1&amp;origin=${mijnLocatie.lat},${mijnLocatie.lon}&amp;destination=${encodeURIComponent(`${e.zaal ? e.zaal + ', ' : ''}${e.stad}`)}">Route &middot; ${ontsnap(toonAfstand(km))}</a>`
-    : '';
+  // De twee bijrollen staan naast elkaar; staat er maar één, dan vult die
+  // de hele regel.
+  const bij = [];
+  if (org?.website) {
+    bij.push(`<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website</a>`);
+  }
+  if (mijnLocatie) {
+    const bestemming = encodeURIComponent(`${e.zaal ? e.zaal + ', ' : ''}${e.stad}`);
+    bij.push(`<a class="pop-knop pop-knop-zacht" target="_blank" rel="noopener noreferrer"
+      href="https://www.google.com/maps/dir/?api=1&amp;origin=${mijnLocatie.lat},${mijnLocatie.lon}&amp;destination=${bestemming}">Route · ${ontsnap(toonAfstand(km))}</a>`);
+  }
 
   return `
-    <div style="--kleur:${kleur}">
-      <div class="pop-datum">${ontsnap(datumLabel(e.datum))} · ${ontsnap(relatief(dagen))}</div>
-      <p class="pop-naam">${ontsnap(e.naam)}</p>
-      <div class="pop-plaats"><b>${ontsnap(e.stad)}</b>${e.zaal ? `<br>${ontsnap(e.zaal)}` : ''}</div>
-      ${meta.length ? `<div class="pop-meta">${meta.join('')}</div>` : ''}
+    <div class="pop" style="--kleur:${kleur}">
+      ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt="" loading="lazy"></div>` : ''}
+
+      <div class="pop-kop">
+        <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
+        <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
+        <div class="pop-plaats">
+          <span class="pop-stad">${ontsnap(e.stad)}</span>
+          ${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}
+        </div>
+        ${meta.length ? `<div class="pop-meta">${meta.join('')}</div>` : ''}
+      </div>
+
       ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
+      ${voorzieningen ? `<div class="pop-voorzieningen">${voorzieningen}</div>` : ''}
       ${d?.beschrijving ? `<details class="pop-tekst"><summary>Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
-      ${org?.website || socials ? `<div class="pop-org">
-        ${org?.website ? `<a class="pop-knop pop-knop-zacht" href="${ontsnap(org.website)}" target="_blank" rel="noopener noreferrer nofollow">Website van de organisator</a>` : ''}
+
+      <div class="pop-acties">
+        <a class="pop-knop pop-knop-hoofd" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Bekijk op pokeradar<span aria-hidden="true"> →</span></a>
+        ${bij.length ? `<div class="pop-bij${bij.length === 1 ? ' is-een' : ''}">${bij.join('')}</div>` : ''}
         ${socials ? `<div class="socials">${socials}</div>` : ''}
-      </div>` : ''}
-      ${route}
-      <a class="pop-knop" href="${ontsnap(e.url)}" target="_blank" rel="noopener noreferrer">Bekijk op pokeradar &rarr;</a>
-      ${e.precisie === 'city' ? '<div class="pop-bron">speld staat op het centrum van de plaats</div>' : ''}
+      </div>
+
+      ${e.precisie === 'city' ? '<p class="pop-bron">Speld staat op het centrum van de plaats</p>' : ''}
     </div>`;
 }
 

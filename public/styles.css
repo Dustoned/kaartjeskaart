@@ -587,97 +587,232 @@ select#type:hover { color: var(--tekst); }
   border-radius: 12px;
   border: 1px solid var(--rand);
   box-shadow: var(--schaduw);
+  /* De beeldbalk loopt tot de rand, dus die moet op de ronding afgesneden. */
+  overflow: hidden;
+  padding: 0;
 }
 .leaflet-popup-tip { background: var(--vlak); border: 1px solid var(--rand); }
-.leaflet-popup-content { margin: 11px 13px 12px; width: 274px !important; max-height: 62vh; overflow-y: auto; }
-.leaflet-popup-close-button { color: var(--tekst-flauw) !important; padding: 7px 7px 0 0 !important; }
-.leaflet-popup-close-button:hover { color: var(--tekst) !important; }
-.leaflet-container a.leaflet-popup-close-button { background: none; }
+/* De inhoud krijgt zelf geen marge meer: de beeldbalk moet tot de rand van
+   het kaartje lopen, dus de witruimte zit per blok binnenin. */
+.leaflet-popup-content { margin: 0; width: 304px !important; max-height: 70vh; overflow-y: auto; }
+/* Het kruisje zweeft boven de inhoud — en soms boven een foto — dus krijgt
+   het een eigen achtergrondje zodat het altijd leesbaar blijft. */
+.leaflet-container a.leaflet-popup-close-button {
+  width: 26px;
+  height: 26px;
+  top: 8px;
+  right: 8px;
+  padding: 0 !important;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--tekst-zacht);
+  background: color-mix(in srgb, var(--vlak) 82%, transparent);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 0 1px var(--rand);
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--tekst);
+  background: var(--vlak);
+}
+
+/* Het kaartje is opgebouwd uit blokken die elk hun eigen witruimte dragen,
+   gescheiden door dunne lijnen: beeld, kop, cijfers, voorzieningen,
+   beschrijving, knoppen. Zo blijft de volgorde logisch, ook als een blok
+   ontbreekt. */
+.pop { display: flex; flex-direction: column; }
+
+.pop-beeld {
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  background: var(--vlak-hoog);
+  border-radius: 11px 11px 0 0;
+}
+.pop-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.pop-kop { padding: 12px 14px 11px; }
 
 .pop-datum {
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: .03em;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
   text-transform: uppercase;
   color: var(--kleur, var(--accent));
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 }
-.pop-naam { font-size: 14.5px; font-weight: 650; line-height: 1.3; margin: 0 0 5px; }
-.pop-plaats { font-size: 12.5px; color: var(--tekst-zacht); margin-bottom: 8px; line-height: 1.45; }
-.pop-plaats b { color: var(--tekst); }
-.pop-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+.pop-wanneer {
+  color: var(--tekst-flauw);
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: none;
+}
 
-/* Het blokje met kerngegevens, zoals pokeradar ze onder een evenement toont. */
+.pop-naam {
+  font-size: 17px;
+  font-weight: 680;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  margin: 0 0 7px;
+  color: var(--tekst);
+}
+
+.pop-plaats { display: flex; flex-direction: column; gap: 1px; margin-bottom: 9px; }
+.pop-stad { font-size: 13.5px; font-weight: 620; color: var(--tekst); }
+.pop-zaal { font-size: 12.5px; color: var(--tekst-zacht); line-height: 1.35; }
+
+.pop-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Cijfers en tijdstippen: drie gelijke kolommen, met scheidingslijntjes
+   ertussen in plaats van eromheen — rustiger dan drie losse doosjes. */
 .pop-feiten {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px 4px;
-  padding: 9px 0;
-  margin-bottom: 9px;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   border-top: 1px solid var(--rand-zacht);
   border-bottom: 1px solid var(--rand-zacht);
+  background: color-mix(in srgb, var(--vlak-hoog) 55%, transparent);
 }
-.feit { text-align: center; line-height: 1.25; }
-.feit-icoon { display: block; font-size: 15px; margin-bottom: 2px; }
-.feit b { display: block; font-size: 12px; font-weight: 650; }
-.feit span:last-child { display: block; font-size: 9.5px; color: var(--tekst-flauw); }
+.feit {
+  text-align: center;
+  padding: 10px 4px 9px;
+  line-height: 1.2;
+}
+.feit + .feit { border-left: 1px solid var(--rand-zacht); }
+.feit-icoon { display: block; font-size: 15px; margin-bottom: 4px; opacity: .85; }
+.feit b {
+  display: block;
+  font-size: 15px;
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+  color: var(--tekst);
+}
+.feit span:last-child {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--tekst-flauw);
+  margin-top: 2px;
+}
 
-.pop-tekst { margin-bottom: 9px; }
+/* Ja/nee-voorzieningen als vinkjes: korter dan een blokje met "Ja" erin. */
+.pop-voorzieningen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px 14px 0;
+}
+.voorziening {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--soort-3) 40%, transparent);
+  background: color-mix(in srgb, var(--soort-3) 13%, transparent);
+  color: var(--tekst);
+  white-space: nowrap;
+}
+.voorziening .vink { font-size: 10px; font-weight: 700; color: var(--soort-3); }
+.voorziening.is-niet {
+  border-color: var(--rand);
+  background: var(--vlak-hoog);
+  color: var(--tekst-flauw);
+}
+.voorziening.is-niet .vink { color: var(--tekst-flauw); }
+
+.pop-tekst { padding: 10px 14px 0; }
 .pop-tekst summary {
   cursor: pointer;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: .02em;
   color: var(--tekst-zacht);
   list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .pop-tekst summary::-webkit-details-marker { display: none; }
-.pop-tekst summary::before { content: "▸ "; color: var(--tekst-flauw); }
-.pop-tekst[open] summary::before { content: "▾ "; }
+.pop-tekst summary::before {
+  content: "";
+  width: 0; height: 0;
+  border: 4px solid transparent;
+  border-left-color: var(--tekst-flauw);
+  margin-right: 1px;
+  transition: transform .15s;
+}
+.pop-tekst[open] summary::before { transform: rotate(90deg) translateX(-1px); }
 .pop-tekst summary:hover { color: var(--tekst); }
 .pop-tekst > div {
-  margin-top: 6px;
+  margin-top: 7px;
   font-size: 11.5px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--tekst-zacht);
-  max-height: 150px;
+  max-height: 160px;
   overflow-y: auto;
+  padding-right: 4px;
 }
 
-.pop-org { margin-bottom: 7px; }
-.socials { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+/* De knoppen staan onderaan bij elkaar: één duidelijke hoofdknop, daaronder
+   hooguit twee bijrollen naast elkaar, en dan pas de socials. */
+.pop-acties { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+
+.pop-knop {
+  display: block;
+  text-align: center;
+  padding: 9px 10px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 620;
+  text-decoration: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pop-knop-hoofd {
+  background: var(--accent);
+  color: var(--accent-tekst);
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.pop-knop-hoofd:hover { filter: brightness(1.07); }
+.pop-knop-zacht {
+  background: var(--vlak-hoog);
+  border-color: var(--rand);
+  color: var(--tekst);
+  font-weight: 560;
+}
+.pop-knop-zacht:hover { border-color: var(--tekst-flauw); background: var(--vlak); }
+
+.pop-bij { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pop-bij.is-een { grid-template-columns: 1fr; }
+
+.socials { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 1px; }
 .social {
-  font-size: 10px;
-  padding: 2px 7px;
+  font-size: 10.5px;
+  padding: 3px 9px;
   border-radius: 999px;
   border: 1px solid var(--rand);
-  background: var(--vlak-hoog);
-  color: var(--tekst-zacht);
+  color: var(--tekst-flauw);
   text-decoration: none;
   text-transform: capitalize;
 }
 .social:hover { color: var(--tekst); border-color: var(--tekst-flauw); }
 
-.pop-knop {
-  display: block;
+.pop-bron {
+  margin: 0;
+  padding: 0 14px 11px;
+  font-size: 10px;
+  color: var(--tekst-flauw);
   text-align: center;
-  padding: 7px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--accent-tekst);
-  font-size: 12.5px;
-  font-weight: 600;
-  text-decoration: none;
-  margin-top: 6px;
 }
-.pop-knop:hover { filter: brightness(1.08); }
-.pop-knop-zacht {
-  background: var(--vlak-hoog);
-  border: 1px solid var(--rand);
-  color: var(--tekst);
-}
-.pop-knop-zacht:hover { border-color: var(--tekst-flauw); filter: none; }
-
-.pop-bron { font-size: 10.5px; color: var(--tekst-flauw); text-align: center; margin-top: 5px; }
 
 .leaflet-control-attribution {
   background: color-mix(in srgb, var(--vlak) 88%, transparent) !important;

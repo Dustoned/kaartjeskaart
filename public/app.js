@@ -738,9 +738,23 @@ function vraagLocatie() {
     return;
   }
 
+  haalPositie({ verplaatsKaart: true });
+}
+
+/**
+ * Vraagt de browser om de huidige positie.
+ *
+ * @param {object} opties
+ * @param {boolean} opties.verplaatsKaart - naar de locatie toe vliegen
+ * @param {boolean} opties.stil - geen foutmelding tonen als het misgaat
+ *   (voor de poging bij het opstarten: die mag niet met rode randjes komen
+ *   als er toevallig geen toestemming is)
+ */
+function haalPositie({ verplaatsKaart = false, stil = false } = {}) {
   const knop = $('#locatieKnop');
   const meldFout = (tekst) => {
     knop.classList.remove('is-bezig');
+    if (stil) return;
     knop.classList.add('is-mis');
     knop.title = tekst;
     $('#locatieLabel').textContent = tekst;
@@ -756,16 +770,64 @@ function vraagLocatie() {
     return;
   }
   knop.classList.add('is-bezig');
-  knop.title = 'Locatie zoeken…';
+  if (!stil) knop.title = 'Locatie zoeken…';
+
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       zetLocatie(pos.coords.latitude, pos.coords.longitude);
       tekenAlles();
-      kaart.flyTo([pos.coords.latitude, pos.coords.longitude], 9, { duration: 0.6 });
+      if (verplaatsKaart) kaart.flyTo([pos.coords.latitude, pos.coords.longitude], 9, { duration: 0.6 });
     },
     (err) => meldFout(err.code === err.PERMISSION_DENIED ? 'Toegang geweigerd' : 'Locatie niet gevonden'),
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
   );
+}
+
+/**
+ * Regelt de locatie bij het openen van de pagina.
+ *
+ * Eerst een eerder onthouden locatie terugzetten, zodat afstanden er meteen
+ * staan zonder dat er iets gevraagd wordt. Daarna kijken hoe het met de
+ * toestemming staat:
+ *
+ *  - al gegeven: de positie stil verversen, want je kunt verhuisd zijn;
+ *  - nog niet gevraagd: één keer vragen, maar pas nadat de kaart er staat.
+ *    Een venster dat voor een lege pagina verschijnt wordt reflexmatig
+ *    weggeklikt;
+ *  - geweigerd: met rust laten. De speldknop blijft staan voor wie het
+ *    later alsnog wil.
+ */
+async function regelLocatieBijOpstart() {
+  try {
+    const bewaard = JSON.parse(localStorage.getItem('kaartjeskaart-locatie') ?? 'null');
+    if (bewaard?.lat && bewaard?.lon) {
+      zetLocatie(bewaard.lat, bewaard.lon, { bewaren: false });
+      tekenAlles(); // afstanden meteen in de lijst
+    }
+  } catch { /* privémodus of rommel in de opslag */ }
+
+  // Niet elke browser kent de Permissions API; dan vragen we het gewoon,
+  // tenzij we al een locatie hebben.
+  let toestand = null;
+  try {
+    const status = await navigator.permissions?.query({ name: 'geolocation' });
+    toestand = status?.state ?? null;
+    // Geeft iemand later alsnog toestemming in de browserinstellingen, dan
+    // pikken we dat meteen op.
+    if (status) {
+      status.addEventListener('change', () => {
+        if (status.state === 'granted' && !mijnLocatie) haalPositie({ stil: true });
+      });
+    }
+  } catch { /* niet ondersteund */ }
+
+  if (toestand === 'denied') return;
+  if (toestand === 'granted') { haalPositie({ stil: true }); return; }
+
+  // Toestand 'prompt' of onbekend: alleen vragen als we nog niets hebben.
+  if (!mijnLocatie) {
+    setTimeout(() => haalPositie({ stil: true, verplaatsKaart: true }), 800);
+  }
 }
 
 /* ---------- mobiele weergave ---------- */
@@ -946,18 +1008,14 @@ async function start() {
     $('#bijgewerkt').style.color = versWeg > 3 ? 'var(--week)' : '';
   }
 
-  // Een eerder toegestane locatie meteen terugzetten, zonder opnieuw te vragen.
-  try {
-    const bewaard = JSON.parse(localStorage.getItem('kaartjeskaart-locatie') ?? 'null');
-    if (bewaard?.lat && bewaard?.lon) zetLocatie(bewaard.lat, bewaard.lon, { bewaren: false });
-  } catch { /* privémodus of rommel in de opslag */ }
-
   tekenAlles();
 
   // Beeld op de gefilterde spelden zetten, maar niet te ver inzoomen.
   if (zichtbaar.length) {
     kaart.fitBounds(L.latLngBounds(zichtbaar.map((e) => [e.lat, e.lon])).pad(0.12), { maxZoom: 11 });
   }
+
+  regelLocatieBijOpstart();
 
   // De extra gegevens (eindtijd, tickets, website, socials) zijn een stuk
   // groter en niet nodig om de kaart te tonen. Die halen we er daarom pas

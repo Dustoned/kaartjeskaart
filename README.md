@@ -47,10 +47,18 @@ evenementen op de agenda verandert en daar een mail over stuurt.
 - **Filteren** op periode (dit weekend, 7 of 30 dagen, alles, of een eigen
   datumbereik), land, soort en een zoekterm. De soort-tags in de lijst en de
   legenda zijn knoppen: erop klikken filtert meteen.
-- **Eigen locatie** via de browser. Daarna staat de afstand bij elke beurs, kun
-  je op afstand sorteren of alleen beurzen binnen zoveel kilometer tonen, en
-  zit er een routeknop in elke popup. Je coördinaten blijven op je eigen
-  apparaat; ze gaan alleen naar `localStorage`.
+- **Eigen locatie** via de browser. Daarna staat de afstand en de rijtijd bij
+  elke beurs, kun je op afstand sorteren of alleen beurzen binnen zoveel
+  kilometer tonen, en zit er een navigeerknop in elke popup. Je coördinaten
+  blijven op je eigen apparaat; ze gaan alleen naar `localStorage`.
+
+  Bij het openen regelt de pagina dit zelf. Staat de toestemming al aan, dan
+  wordt de positie stil ververst — je krijgt dus geen venster te zien. Is er
+  nog nooit om gevraagd, dan gebeurt dat één keer, en pas nadat de kaart er
+  staat: een venster boven een lege pagina wordt reflexmatig weggeklikt. Is
+  het ooit geweigerd, dan laat de pagina het met rust; de speldknop blijft
+  staan voor wie het later alsnog wil. Geef je later alsnog toestemming in de
+  browserinstellingen, dan wordt dat direct opgepikt.
 - **Kleur op soort of op datum**, met een schakelaar. Let op: 212 van de 235
   evenementen zijn van het soort "Beurs", dus op soort kleuren maakt de kaart
   grotendeels eenkleurig. Op datum is vaak bruikbaarder.

@@ -474,6 +474,7 @@ function popupHtml(e) {
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
         <p class="pop-plaats">${ontsnap(e.stad)}${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}</p>
+        ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
 
         ${tijdBlok}
         ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
@@ -487,7 +488,6 @@ function popupHtml(e) {
       ${reis || knoppen.length ? `<div class="pop-voet">
         ${reis}
         <div class="pop-knoppen">${knoppen.join('')}</div>
-        ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
       </div>` : ''}
     </div>`;
 }

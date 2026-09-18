@@ -926,17 +926,14 @@ a { color: inherit; }
 
 .social { text-decoration: none; }
 .social:hover { background: color-mix(in oklab, var(--vlak-hoog) 70%, var(--tekst)); }
-/* De socials staan onderin bij de knoppen, want het zijn links naar de
-   organisator en geen kenmerk van de beurs. Eigen regel, gescheiden door
-   een lijntje, en intern niet afbrekend zodat ze bij elkaar blijven. */
+/* De socials staan direct onder de naam en plaats: het zijn de kanalen van
+   de organisator, dus die horen bij wie het organiseert. Onderin stonden ze
+   de knoppen in de weg, en die horen het laatste te zijn. */
 .pop-socials {
   display: flex;
-  justify-content: center;
   gap: 5px;
   flex-wrap: nowrap;
-  padding-top: 10px;
-  margin-top: 2px;
-  border-top: 1px solid var(--rand);
+  margin-top: 9px;
 }
 
 .pop-tekst { margin-top: 12px; }

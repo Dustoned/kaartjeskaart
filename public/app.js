@@ -550,7 +550,12 @@ function maakSpeld(e) {
     }),
     title: `${e.naam} — ${e.stad}`,
   });
-  marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPanPadding: [14, 14] });
+  /* `autoPan` uit: Leaflet schoof na het openen nog eens bij om het kaartje
+     passend te krijgen, en dat was een tweede beweging bovenop de onze — met
+     een uitkomst die afhing van de lengte van het kaartje. Een kort kaartje
+     belandde 146 pixels boven het midden, een lang 50. We zetten hem nu zelf
+     neer, in één keer, altijd op dezelfde plek. */
+  marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPan: false });
   marker.on('popupopen', async (ev) => {
     zetGekozen(e.id, true);
     const el = ev.popup.getElement();
@@ -558,7 +563,12 @@ function maakSpeld(e) {
     // Laadt de afbeelding niet, dan de hele balk weghalen: liever geen beeld
     // dan een grijze strook bovenaan het kaartje.
     const img = el?.querySelector('.pop-beeld img');
-    img?.addEventListener('error', () => img.closest('.pop-beeld')?.remove(), { once: true });
+    img?.addEventListener('error', () => {
+      img.closest('.pop-beeld')?.remove();
+      zetKaartjeInMidden(ev.popup);   // het kaartje is nu korter geworden
+    }, { once: true });
+
+    zetKaartjeInMidden(ev.popup);
 
     /* Past het kaartje niet in één keer, dan begint het onder de banner.
        Anders open je op een plaatje terwijl je de datum, de tijd en het
@@ -1002,6 +1012,48 @@ function maakSchuifbaar(lijf) {
   }, { passive: false });
 }
 
+/* De onderkant van een kaartje staat altijd even ver boven de speld: dertien
+   pixels, plus een pixel rand. Dat ligt vast, ongeacht de inhoud, en daarmee
+   is vooraf uit te rekenen waar de kaart moet liggen om het kaartje midden in
+   beeld te krijgen. */
+const KAARTJE_GAT = 14;
+
+/** Waar moet het midden van de kaart liggen zodat het kaartje in het midden staat? */
+function middenVoorKaartje(latlng, zoom, kaartjeHoogte) {
+  const punt = kaart.project(latlng, zoom);
+  return kaart.unproject(punt.subtract(L.point(0, KAARTJE_GAT + kaartjeHoogte / 2)), zoom);
+}
+
+/* Hoe hoog wordt het kaartje? Dat weten we pas als het er staat, en dan is het
+   te laat: dan rest alleen nog achteraf bijschuiven, en juist dat heen-en-weer
+   wilden we kwijt. Dus zetten we dezelfde inhoud even buiten beeld neer en
+   meten we hem daar. Het vakje wordt één keer gemaakt en daarna hergebruikt. */
+let meetvak = null;
+function meetKaartjeHoogte(e) {
+  if (!meetvak) {
+    meetvak = document.createElement('div');
+    meetvak.className = 'leaflet-popup-content meetvak';
+    meetvak.setAttribute('aria-hidden', 'true');
+    document.body.append(meetvak);
+  }
+  meetvak.innerHTML = popupHtml(e);
+  const hoogte = meetvak.firstElementChild?.getBoundingClientRect().height ?? 0;
+  meetvak.replaceChildren();
+  return hoogte;
+}
+
+/* Vangnet voor als het kaartje toch afwijkt van de meting — een banner die
+   niet laadt en eruit gehaald wordt, bijvoorbeeld. Meestal doet dit niets. */
+function zetKaartjeInMidden(popup) {
+  const el = popup?.getElement();
+  if (!el) return;
+  const vak = kaart.getContainer().getBoundingClientRect();
+  const kaartje = el.getBoundingClientRect();
+  const afwijking = Math.round((kaartje.top + kaartje.height / 2) - (vak.top + vak.height / 2));
+  if (Math.abs(afwijking) <= 4) return;
+  kaart.panBy([0, afwijking]);
+}
+
 function openSpeld(marker, poging = 0) {
   if (marker.isPopupOpen()) return;
   if (kaart.hasLayer(marker)) { marker.openPopup(); return; }
@@ -1019,24 +1071,22 @@ function springNaar(id) {
   requestAnimationFrame(() => {
     kaart.invalidateSize();
 
-    /* Staat de speld al los op de kaart en ruim in beeld, dan hoeft er
-       niets te bewegen: gewoon openklappen. Eerder ging hier altijd
-       `zoomToShowLayer` overheen, en dat zoomt en schuift ook als het
-       nergens voor nodig is — dat voelde als te agressief centreren. */
-    const staatErAl = kaart.hasLayer(marker);
-    const ruimInBeeld = staatErAl && kaart.getBounds().pad(-0.18).contains(marker.getLatLng());
-    if (ruimInBeeld) { marker.openPopup(); return; }
+    /* Eén beweging, naar de plek waar het kaartje straks precies in het midden
+       komt te staan. Daarvoor meten we vooraf hoe hoog het wordt.
 
-    /* Anders zelf naar de speld toe. Dit deed `zoomToShowLayer`, maar die
-       rekent uit óf er bewogen moet worden en doet niets zodra de kaart al
-       goed genoeg staat — en dan blijft de popup dicht. Vanaf zoom 11 gebeurde
-       er zo regelmatig helemaal niets als je een beurs verderop aantikte.
+       Hier stond een uitzondering: was de speld al ruim in beeld, dan bewoog er
+       niets. Maar dan kwam het kaartje ook niet in het midden, en dat was juist
+       het onrustige eraan. Staat de kaart al goed, dan levert deze berekening
+       hetzelfde midden op en beweegt er vanzelf niets.
 
        Voorbij `LOSSE_SPELDEN_ZOOM` clustert er niets meer, dus na deze sprong
-       staat de speld zeker los en kan de popup zonder omwegen open. Zat je al
-       dichterbij, dan blijft dat zoomniveau staan: geen onnodige sprong. */
+       staat de speld zeker los en kan de popup open. Zat je al dichterbij, dan
+       blijft dat zoomniveau staan: geen onnodige sprong. */
+    const beurs = zichtbaar.find((x) => x.id === id);
+    const hoogte = beurs ? meetKaartjeHoogte(beurs) : 0;
+    const zoom = Math.max(kaart.getZoom(), LOSSE_SPELDEN_ZOOM);
     kaart.once('moveend', () => setTimeout(() => openSpeld(marker), 0));
-    kaart.setView(marker.getLatLng(), Math.max(kaart.getZoom(), LOSSE_SPELDEN_ZOOM));
+    kaart.setView(middenVoorKaartje(marker.getLatLng(), zoom, hoogte), zoom);
   });
 }
 

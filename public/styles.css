@@ -789,6 +789,17 @@ a { color: inherit; }
 
 /* Beeld en voet liggen vast, het middenstuk schuift. Zo kun je nooit in een
    kaartje zitten waarvan de knoppen onbereikbaar onderaan hangen. */
+/* Buiten beeld, alleen om te meten hoe hoog een kaartje wordt voordat het
+   opengaat — zie meetKaartjeHoogte(). Krijgt bewust dezelfde opmaak als een
+   echt kaartje, anders klopt de meting niet. */
+.meetvak {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .pop {
   display: flex;
   flex-direction: column;

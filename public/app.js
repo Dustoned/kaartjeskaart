@@ -1042,16 +1042,26 @@ function meetKaartjeHoogte(e) {
   return hoogte;
 }
 
-/* Vangnet voor als het kaartje toch afwijkt van de meting — een banner die
-   niet laadt en eruit gehaald wordt, bijvoorbeeld. Meestal doet dit niets. */
+/* Zet het kaartje midden in de kaart, in beide richtingen.
+
+   Bij het aantikken van een speld op de kaart is dit het enige dat het
+   kaartje op zijn plek zet: er gaat dan geen sprong aan vooraf. Deed dit
+   alleen de hoogte, dan bleef het kaartje links of rechts hangen waar de
+   speld toevallig stond — en bij een speld aan de rechterkant liep het
+   gewoon van het scherm af.
+
+   Na een sprong uit de lijst is er meestal niets meer te doen: die mikt al
+   raak. Dan vangt dit alleen nog het verschil op tussen de voorgemeten en de
+   werkelijke hoogte, bijvoorbeeld als de banner niet laadde. */
 function zetKaartjeInMidden(popup) {
   const el = popup?.getElement();
   if (!el) return;
   const vak = kaart.getContainer().getBoundingClientRect();
   const kaartje = el.getBoundingClientRect();
-  const afwijking = Math.round((kaartje.top + kaartje.height / 2) - (vak.top + vak.height / 2));
-  if (Math.abs(afwijking) <= 4) return;
-  kaart.panBy([0, afwijking]);
+  const dx = Math.round((kaartje.left + kaartje.width / 2) - (vak.left + vak.width / 2));
+  const dy = Math.round((kaartje.top + kaartje.height / 2) - (vak.top + vak.height / 2));
+  if (Math.abs(dx) <= 4 && Math.abs(dy) <= 4) return;
+  kaart.panBy([dx, dy]);
 }
 
 function openSpeld(marker, poging = 0) {

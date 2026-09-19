@@ -110,17 +110,13 @@ html, body {
   margin: 0;
   overflow: hidden;
   overscroll-behavior: none;
-  /* De pagina zelf mag niet meebewegen op een telefoon: geen knijpzoom op
-     de hele site en geen zoomsprong bij dubbeltikken. De kaart houdt zijn
-     eigen gebaren, want Leaflet vangt die zelf af; alleen de plekken die
-     echt scrollen krijgen hieronder weer toestemming. */
-  touch-action: none;
+  /* `pan-y` en niet `none`: verticaal schuiven blijft toegestaan, zodat de
+     lijst met je vinger scrolt, maar knijpzoomen en de zoomsprong bij
+     dubbeltikken zijn eraf. Met `none` zou ook het scrollen sneuvelen.
+     De kaart valt hier buiten: Leaflet zet op zijn eigen container
+     `touch-action: none` en vangt slepen en knijpen zelf af. */
+  touch-action: pan-y;
 }
-
-/* Wat wél mag schuiven, en in welke richting. */
-.lijst,
-.pop-tekst > div,
-.leaflet-popup-content { touch-action: pan-y; }
 
 body {
   background: var(--bg);

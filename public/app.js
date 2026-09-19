@@ -626,6 +626,13 @@ function lijstRijen() {
 let lijstVingerafdruk = null;
 let lijstGepland = null;
 
+/* De lijst wordt in happen opgebouwd: eerst een stuk of zestig regels, de
+   rest zodra je ernaartoe scrolt. Een "stuk" is één kaartje of één
+   datumkop. */
+const LIJST_HAP = 60;
+let lijstStukken = [];
+let lijstGetoond = 0;
+
 function lijstMisschienOpnieuw() {
   const rijen = lijstRijen();
   // Het aantal op de lijstknop kost niets en hoort direct te kloppen, ook
@@ -741,8 +748,42 @@ function tekenLijst() {
     }
   }
 
-  lijst.innerHTML = stukken.join('');
+  /* Niet alles in één keer in de pagina zetten. Bij tweehonderd beurzen zijn
+     dat bijna vijfduizend elementen terwijl je er een stuk of zes ziet.
+     We zetten er een eerste hap neer en vullen bij zodra je naar beneden
+     scrolt. Wat er al stond blijft staan, zodat je scrolpositie klopt na
+     een kaartbeweging. */
+  lijstStukken = stukken;
+  lijstGetoond = Math.min(Math.max(LIJST_HAP, lijstGetoond), stukken.length);
+  lijst.innerHTML = stukken.slice(0, lijstGetoond).join('');
   lijst.scrollTop = scrolpositie;
+  vulLijstAanIndienNodig();
+}
+
+/** Een volgende hap kaartjes onderaan de lijst zetten. */
+function vulLijstAan() {
+  if (lijstGetoond >= lijstStukken.length) return;
+  const lijst = $('#lijst');
+  const tot = Math.min(lijstGetoond + LIJST_HAP, lijstStukken.length);
+  lijst.insertAdjacentHTML('beforeend', lijstStukken.slice(lijstGetoond, tot).join(''));
+  lijstGetoond = tot;
+}
+
+/**
+ * Bijvullen zolang de onderkant in zicht komt. Ook nodig direct na het
+ * tekenen: op een hoog scherm past de eerste hap er soms helemaal op, en
+ * dan zou je nooit een scrollgebeurtenis krijgen om de rest te laden.
+ */
+function vulLijstAanIndienNodig() {
+  const lijst = $('#lijst');
+  let rondes = 0;
+  while (
+    lijstGetoond < lijstStukken.length &&
+    lijst.scrollHeight - lijst.scrollTop - lijst.clientHeight < 600 &&
+    rondes++ < 20
+  ) {
+    vulLijstAan();
+  }
 }
 
 /**
@@ -819,6 +860,8 @@ function merkActieveFilters() {
 
 /** Filter gewijzigd: opnieuw tekenen en het beeld erop zetten. */
 function naFilter() {
+  // Ander filter, andere lijst: weer bij de eerste hap beginnen.
+  lijstGetoond = 0;
   tekenAlles();
   merkActieveFilters();
   herstelBeeld();
@@ -832,8 +875,16 @@ function zetGekozen(id, vanuitKaart) {
     el.classList.toggle('is-gekozen', el.dataset.id === id);
   }
   if (id && vanuitKaart) {
-    const rij = document.querySelector(`.kaartje[data-id="${CSS.escape(id)}"]`);
+    // De lijst wordt in happen opgebouwd, dus de bijbehorende regel kan nog
+    // niet in de pagina staan. Bijvullen tot hij er is.
+    let rij = document.querySelector(`.kaartje[data-id="${CSS.escape(id)}"]`);
+    while (!rij && lijstGetoond < lijstStukken.length) {
+      vulLijstAan();
+      rij = document.querySelector(`.kaartje[data-id="${CSS.escape(id)}"]`);
+    }
     rij?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Na het aanvullen kan de onderkant weer in zicht zijn.
+    if (rij) for (const el of document.querySelectorAll('.kaartje')) el.classList.toggle('is-gekozen', el.dataset.id === id);
   }
 }
 
@@ -1096,6 +1147,34 @@ function zetWeergave(welke) {
   if (welke === 'lijst' && lijstIsVerouderd) tekenLijst();
 }
 
+/**
+ * Knijpzoomen buiten de kaart tegenhouden.
+ *
+ * `touch-action` in de opmaak is niet genoeg: Safari op iOS behandelt het
+ * knijpzoomen van een pagina als een eigen browsergebaar dat zich daar niets
+ * van aantrekt. Die gebaren onderscheppen we hier, behalve boven de kaart —
+ * daar hoort knijpen juist te werken.
+ *
+ * Bewust géén `user-scalable=no` in de viewport-regel: dat negeert iOS ook,
+ * en het zou de zoominstelling van de browser blokkeren voor wie die nodig
+ * heeft om tekst te kunnen lezen. Dit raakt alleen het gebaar.
+ */
+function houdPaginaZoomTegen() {
+  const opDeKaart = (doel) => !!doel?.closest?.('#kaart');
+
+  // De gesture-gebeurtenissen van Safari; andere browsers kennen ze niet.
+  for (const soort of ['gesturestart', 'gesturechange', 'gestureend']) {
+    document.addEventListener(soort, (ev) => {
+      if (!opDeKaart(ev.target)) ev.preventDefault();
+    }, { passive: false });
+  }
+
+  // En voor de rest: twee vingers die bewegen buiten de kaart.
+  document.addEventListener('touchmove', (ev) => {
+    if (ev.touches.length > 1 && !opDeKaart(ev.target)) ev.preventDefault();
+  }, { passive: false });
+}
+
 /* ---------- opstarten ---------- */
 
 function koppelBediening() {
@@ -1181,8 +1260,12 @@ function koppelBediening() {
 
   $('#sorteerKnop').addEventListener('change', (ev) => {
     sorteerOpAfstand = ev.target.checked;
+    lijstGetoond = 0; // andere volgorde, dus weer bovenaan beginnen
     tekenAlles();
   });
+
+  // Bijvullen zodra je de onderkant nadert.
+  $('#lijst').addEventListener('scroll', vulLijstAanIndienNodig, { passive: true });
 
   for (const knop of document.querySelectorAll('[data-land]')) {
     knop.addEventListener('click', () => {
@@ -1292,6 +1375,7 @@ async function start() {
   }
   maakKaart();
   koppelBediening();
+  houdPaginaZoomTegen();
 
   let data;
   try {

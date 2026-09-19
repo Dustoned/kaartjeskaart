@@ -720,6 +720,12 @@ a { color: inherit; }
 
 /* ---------- popup ---------- */
 
+/* Leaflet laat een kaartje in twee tienden van een seconde wegvagen. Dat is
+   traag genoeg om te blijven plakken op het moment dat je de kaart al aan het
+   verslepen bent — het kaartje schuift dan nog mee terwijl je er al vanaf
+   wilt. Korter, en met een afremmende curve zodat het meteen vaart maakt. */
+.leaflet-fade-anim .leaflet-popup { transition: opacity .12s ease-out; }
+
 .leaflet-popup-content-wrapper {
   background: var(--vlak);
   color: var(--tekst);

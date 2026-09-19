@@ -334,6 +334,16 @@ function maakKaart() {
 
   kaart.on('moveend', () => { if (filters.inBeeld) lijstMisschienOpnieuw(); });
   kaart.on('resize', ververPopupHoogte);
+
+  /* Ga je zelf slepen of zoomen, dan ben je met de kaart bezig en niet meer
+     met die ene beurs: het kaartje gaat dan meteen dicht.
+
+     Onze eigen bewegingen komen hier niet langs. `dragstart` vuurt alleen
+     als jij sleept, en `zoomstart` alleen als het zoomniveau verandert — en
+     dat gebeurt aan onze kant enkel in springNaar, waar op dat moment nog
+     geen kaartje openstaat. Het rechtzetten achteraf schuift alleen, dus dat
+     raakt niets. */
+  kaart.on('dragstart zoomstart', () => kaart.closePopup());
   ververPopupHoogte();
   kaart.on('popupclose', () => { zetGekozen(null, false); });
 }

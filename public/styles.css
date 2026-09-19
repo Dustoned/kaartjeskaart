@@ -828,33 +828,23 @@ a { color: inherit; }
 /* Socials links, tijd rechts ernaast op dezelfde regel. Daarmee staat er
    niets meer leeg naast de icoontjes én staan de grote cijfers rechts, in
    plaats van los onder de kop met een gat ernaast. */
-.pop-koprij {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  margin-top: 8px;
-}
-.pop-koprij .pop-socials { margin-top: 2px; }
-
+/* De openingstijd op een eigen regel: grote cijfers links, de duur tegen de
+   rechterrand. Past het bijschrift er niet naast — bij een beurs met
+   VIP-tijd bijvoorbeeld — dan zakt het naar de volgende regel. */
 .pop-tijd {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  flex: 0 0 auto;
-  /* Bij vijf socials past de tijd er niet meer naast en zakt hij naar een
-     eigen regel. Dan hoort hij nog steeds rechts te staan, vandaar de
-     automatische marge links. */
-  margin-left: auto;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 11px;
 }
 .pop-tijd-groot {
   display: block;
-  font-size: 23px;
-  font-weight: 600;
-  letter-spacing: -.02em;
-  line-height: 1.1;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
   color: var(--tekst);
 }
@@ -864,7 +854,6 @@ a { color: inherit; }
   margin: 0 .18em;
 }
 .pop-tijd-bij {
-  margin-top: 2px;
   font-size: 12px;
   line-height: 1.35;
   color: var(--tekst-zacht);
@@ -948,11 +937,12 @@ a { color: inherit; }
 
 .social { text-decoration: none; }
 .social:hover { background: color-mix(in oklab, var(--vlak-hoog) 70%, var(--tekst)); }
-/* De socials: op één regel bij elkaar, links in de koprij naast de tijd. */
+/* De socials: op één regel bij elkaar, onder de naam. */
 .pop-socials {
   display: flex;
   gap: 4px;
   flex-wrap: nowrap;
+  margin-top: 8px;
 }
 
 .pop-tekst { margin-top: 10px; }

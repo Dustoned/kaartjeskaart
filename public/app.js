@@ -441,11 +441,6 @@ function popupHtml(e) {
        </div>`
     : '';
 
-  // De socials staan links, de tijd rechts ernaast: dat vult de regel en
-  // houdt de grote cijfers bij de kop in plaats van er los onder.
-  const kopRij = socials || tijdBlok
-    ? `<div class="pop-koprij">${socials ? `<div class="pop-socials">${socials}</div>` : '<span></span>'}${tijdBlok}</div>`
-    : '';
 
   // Hoe groot en hoe ingeburgerd: twee getallen die helpen kiezen.
   const feiten = [];
@@ -487,7 +482,8 @@ function popupHtml(e) {
       <div class="pop-lijf">
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
-        ${kopRij}
+        ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
+        ${tijdBlok}
         ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
 
         <!-- Soort en voorzieningen bij elkaar: allemaal kenmerken van deze

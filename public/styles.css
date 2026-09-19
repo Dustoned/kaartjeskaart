@@ -1013,16 +1013,24 @@ a { color: inherit; }
 .kopieerknop.is-gelukt { color: var(--soort-3); }
 .kopieerknop.is-gelukt .ic { stroke-width: 2.6; }
 
+/* De rijtijd is waar je op afgaat als je besluit of je gaat, dus die staat
+   groter dan de rest van de voet en de tijd zelf in de gewone tekstkleur.
+   De afstand eromheen blijft ingetogen. */
 .pop-reis {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--tekst-zacht);
 }
+.pop-reis b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tekst);
+}
 .pop-reis .ic { color: var(--tekst-zacht); }
-.pop-reis.is-echt { color: var(--tekst); }
+.reis-scheiding { opacity: .5; margin: 0 1px; }
 
 /* Even breed, ongeacht hoeveel het er zijn. Een raster met gelijke kolommen
    doet dat vanzelf, terwijl flex ze op hun tekstlengte laat verschillen —

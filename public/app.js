@@ -209,9 +209,14 @@ async function haalReistijd(e) {
   }
 }
 
-/** De regel met rijtijd en afstand over de weg. */
+/**
+ * De regel met rijtijd en afstand. De tijd staat er groter en in de gewone
+ * tekstkleur bij: dat is waar je op afgaat als je besluit of je gaat. De
+ * afstand blijft ingetogen. "over de weg" is eraf — dat spreekt vanzelf
+ * zodra er een rijtijd naast staat.
+ */
 function reisTekst({ minuten, km, geschat }) {
-  return `${geschat ? '±&nbsp;' : ''}${toonDuur(minuten)} rijden · ${toonAfstand(km)} over de weg`;
+  return `<b>${geschat ? '±&nbsp;' : ''}${toonDuur(minuten)}</b> rijden <span class="reis-scheiding">·</span> ${toonAfstand(km)}`;
 }
 
 /* ---------- thema ---------- */

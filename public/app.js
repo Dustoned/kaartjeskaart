@@ -8,9 +8,6 @@ const TEGELS = {
   donker: 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
   licht: 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
 };
-const NAAMSVERMELDING =
-  'Tegels &copy; <a href="https://www.esri.com">Esri</a> &middot; ' +
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bijdragers';
 const TEGEL_MAXZOOM = 16;
 
 /* Vanaf dit zoomniveau clustert er niets meer: elke speld staat er los op
@@ -248,6 +245,11 @@ function maakKaart() {
     center: [51.85, 4.9],
     zoom: 7,
     zoomControl: true,
+    /* De bronvermelding staat niet op de kaart maar in de voettekst van de
+       lijst, naast de bron van de beursgegevens. Weglaten kan niet: die
+       vermelding is de voorwaarde waaronder de tegels van Esri en de
+       gegevens van OpenStreetMap vrij te gebruiken zijn. */
+    attributionControl: false,
     // Verder uitzoomen dan 6 heeft geen zin voor een Benelux-kaart, en het
     // zorgt voor grijze banden boven en onder zodra de wereldkaart smaller
     // wordt dan het venster. De grenzen houden je bovendien in de buurt.
@@ -280,7 +282,6 @@ function maakKaart() {
 
   const thema = document.documentElement.dataset.thema;
   tegellaag = L.tileLayer(TEGELS[thema === 'licht' ? 'licht' : 'donker'], {
-    attribution: NAAMSVERMELDING,
     // Esri levert tot zoom 16; daarboven rekt Leaflet de laatste tegel op,
     // zodat je wel verder kunt inzoomen op een speld.
     maxNativeZoom: TEGEL_MAXZOOM,

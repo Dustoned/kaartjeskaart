@@ -567,8 +567,10 @@ function maakSpeld(e) {
        toch niets te schuiven. */
     requestAnimationFrame(() => {
       const lijf = el?.querySelector('.pop-lijf');
-      const beeld = lijf?.querySelector('.pop-beeld');
-      if (lijf && beeld) lijf.scrollTop = beeld.offsetHeight;
+      if (!lijf) return;
+      maakSchuifbaar(lijf);
+      const beeld = lijf.querySelector('.pop-beeld');
+      if (beeld) lijf.scrollTop = beeld.offsetHeight;
     });
 
     // De echte rijtijd opvragen en over de schatting heen zetten. Lukt het
@@ -942,6 +944,64 @@ function zetGekozen(id, vanuitKaart) {
  * ook dat er niet, dan laten we het erbij. De kaart staat op dat moment al op
  * de goede plek, dus je ziet nog steeds waar de beurs is.
  */
+/* Of een schuifbaar vlak binnen de kaart met je vinger meegeeft, verschilt per
+   browser: Leaflet zet `touch-action: none` op de kaart om slepen en knijpen
+   zelf af te handelen, en sommige browsers trekken dat door naar alles wat
+   erin staat. Dan staat het kaartje muurvast en kom je niet bij de rest.
+
+   We laten het eerst aan de browser: dat schuift het prettigst, met uitloop.
+   Blijkt bij de eerste veeg dat er niets gebeurt terwijl er wel ruimte was,
+   dan nemen we het over — voor de rest van de sessie, want dit verandert niet
+   halverwege. */
+let zelfSchuiven = false;
+
+function maakSchuifbaar(lijf) {
+  let vorigeY = 0;
+  let meten = false;
+
+  lijf.addEventListener('touchstart', (ev) => {
+    if (ev.touches.length !== 1) return;
+    vorigeY = ev.touches[0].clientY;
+    meten = !zelfSchuiven;
+  }, { passive: true });
+
+  // Niet passief: als we het overnemen moeten we het standaardgedrag tegenhouden.
+  lijf.addEventListener('touchmove', (ev) => {
+    if (ev.touches.length !== 1) return;
+    const y = ev.touches[0].clientY;
+    const verschil = vorigeY - y;
+    vorigeY = y;
+
+    if (zelfSchuiven) {
+      lijf.scrollTop += verschil;
+      ev.preventDefault();
+      return;
+    }
+
+    if (!meten) return;
+    meten = false;
+    // Alleen meten als er in déze richting daadwerkelijk ruimte is, anders
+    // zou stilstand aan de bovenrand al voor een weigering doorgaan.
+    const ruimte = verschil > 0
+      ? lijf.scrollHeight - lijf.clientHeight - lijf.scrollTop
+      : lijf.scrollTop;
+    if (ruimte <= 1) return;
+
+    /* Even de tijd geven voordat we concluderen dat er niets gebeurt: browsers
+       laten schuiven vaak aan de compositor over, en dan staat `scrollTop` na
+       één beeldje nog op de oude waarde terwijl het wel degelijk werkt. Een
+       scroll-melding is het duidelijkste teken van leven. */
+    const voor = lijf.scrollTop;
+    let browserDoetHet = false;
+    const merk = () => { browserDoetHet = true; };
+    lijf.addEventListener('scroll', merk, { passive: true });
+    setTimeout(() => {
+      lijf.removeEventListener('scroll', merk);
+      if (!browserDoetHet && lijf.scrollTop === voor) zelfSchuiven = true;
+    }, 120);
+  }, { passive: false });
+}
+
 function openSpeld(marker, poging = 0) {
   if (marker.isPopupOpen()) return;
   if (kaart.hasLayer(marker)) { marker.openPopup(); return; }

@@ -400,7 +400,7 @@ function popupHtml(e) {
   // de plaatsnaam — allemaal korte etiketten die bij het evenement horen.
   const meta = [];
   if (e.type) meta.push(`<button type="button" class="etiket etiket-knop" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
-  // De VIP-tijd staat al bij de openingstijd; als tag stond hij er dubbel.
+  if (e.viptijd) meta.push(`<span class="etiket">${icoon('klok', 12)}VIP ${ontsnap(e.viptijd)}</span>`);
   if (e.geannuleerd) meta.push('<span class="etiket is-af">Geannuleerd</span>');
 
   // De socials horen niet tussen de etiketten: die beschrijven de beurs, en
@@ -423,10 +423,10 @@ function popupHtml(e) {
   // Lang niet elke beurs vult alles in. Wat ontbreekt laten we weg in plaats
   // van er "onbekend" neer te zetten: een kaartje moet er ook compleet
   // uitzien als de helft van de velden leeg is.
-  const bijTijd = [
-    d?.eindtijd ? duurTekst(e.tijd, d.eindtijd) : null,
-    e.viptijd ? `VIP vanaf ${e.viptijd}` : null,
-  ].filter(Boolean).join(' · ');
+  // Alleen de duur naast de tijd. De VIP-tijd stond er ook bij, en dan werd
+  // de regel te lang om naast de grote cijfers te passen — die staat nu als
+  // etiket, waar hij inhoudelijk ook thuishoort.
+  const bijTijd = d?.eindtijd ? duurTekst(e.tijd, d.eindtijd) : '';
 
   const tijdBlok = e.tijd
     ? `<div class="pop-tijd">

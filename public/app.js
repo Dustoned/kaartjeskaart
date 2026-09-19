@@ -405,7 +405,8 @@ function popupHtml(e) {
   // de plaatsnaam — allemaal korte etiketten die bij het evenement horen.
   const meta = [];
   if (e.type) meta.push(`<button type="button" class="etiket etiket-knop" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
-  if (e.viptijd) meta.push(`<span class="etiket">${icoon('klok', 12)}VIP ${ontsnap(e.viptijd)}</span>`);
+  // De VIP-tijd staat bij de openingstijd, niet hier: het is een tijd, geen
+  // kenmerk. Als etiket stond hij er bovendien dubbel.
   if (e.geannuleerd) meta.push('<span class="etiket is-af">Geannuleerd</span>');
 
   // De socials horen niet tussen de etiketten: die beschrijven de beurs, en
@@ -428,16 +429,22 @@ function popupHtml(e) {
   // Lang niet elke beurs vult alles in. Wat ontbreekt laten we weg in plaats
   // van er "onbekend" neer te zetten: een kaartje moet er ook compleet
   // uitzien als de helft van de velden leeg is.
-  // Alleen de duur naast de tijd. De VIP-tijd stond er ook bij, en dan werd
-  // de regel te lang om naast de grote cijfers te passen — die staat nu als
-  // etiket, waar hij inhoudelijk ook thuishoort.
-  const bijTijd = d?.eindtijd ? duurTekst(e.tijd, d.eindtijd) : '';
+  const bijTijd = [
+    d?.eindtijd ? duurTekst(e.tijd, d.eindtijd) : null,
+    e.viptijd ? `VIP vanaf ${e.viptijd}` : null,
+  ].filter(Boolean).join(' · ');
 
   const tijdBlok = e.tijd
     ? `<div class="pop-tijd">
          <span class="pop-tijd-groot">${ontsnap(e.tijd)}${d?.eindtijd ? `<span class="tot">–</span>${ontsnap(d.eindtijd)}` : ''}</span>
          ${bijTijd ? `<span class="pop-tijd-bij">${ontsnap(bijTijd)}</span>` : ''}
        </div>`
+    : '';
+
+  // De socials staan links, de tijd rechts ernaast: dat vult de regel en
+  // houdt de grote cijfers bij de kop in plaats van er los onder.
+  const kopRij = socials || tijdBlok
+    ? `<div class="pop-koprij">${socials ? `<div class="pop-socials">${socials}</div>` : '<span></span>'}${tijdBlok}</div>`
     : '';
 
   // Hoe groot en hoe ingeburgerd: twee getallen die helpen kiezen.
@@ -480,9 +487,7 @@ function popupHtml(e) {
       <div class="pop-lijf">
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
-        ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
-
-        ${tijdBlok}
+        ${kopRij}
         ${feiten.length ? `<div class="pop-feiten">${feiten.join('')}</div>` : ''}
 
         <!-- Soort en voorzieningen bij elkaar: allemaal kenmerken van deze

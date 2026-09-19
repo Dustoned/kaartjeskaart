@@ -350,6 +350,8 @@ const ICONEN = {
   vink: '<path d="M20 6 9 17l-5-5"/>',
   pijlRechts: '<path d="m9 18 6-6-6-6"/>',
   extern: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  speld: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  kopieer: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
 };
 
 const icoon = (naam, grootte = 14) =>
@@ -398,7 +400,7 @@ function popupHtml(e) {
   // de plaatsnaam — allemaal korte etiketten die bij het evenement horen.
   const meta = [];
   if (e.type) meta.push(`<button type="button" class="etiket etiket-knop" data-tag="${ontsnap(e.type)}">${ontsnap(e.type)}</button>`);
-  if (e.viptijd) meta.push(`<span class="etiket">VIP vanaf ${ontsnap(e.viptijd)}</span>`);
+  // De VIP-tijd staat al bij de openingstijd; als tag stond hij er dubbel.
   if (e.geannuleerd) meta.push('<span class="etiket is-af">Geannuleerd</span>');
 
   // De socials horen niet tussen de etiketten: die beschrijven de beurs, en
@@ -473,7 +475,6 @@ function popupHtml(e) {
       <div class="pop-lijf">
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
-        <p class="pop-plaats">${ontsnap(e.stad)}${e.zaal ? `<span class="pop-zaal">${ontsnap(e.zaal)}</span>` : ''}</p>
         ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
 
         ${tijdBlok}
@@ -485,10 +486,16 @@ function popupHtml(e) {
         ${d?.beschrijving ? `<details class="pop-tekst"><summary>${icoon('pijlRechts', 12)}Beschrijving</summary><div>${ontsnap(d.beschrijving).replace(/\n+/g, '<br>')}</div></details>` : ''}
       </div>
 
-      ${reis || knoppen.length ? `<div class="pop-voet">
+      <div class="pop-voet">
+        ${e.adres ? `<p class="pop-adres">
+          ${icoon('speld', 14)}
+          <span class="pop-adres-tekst">${ontsnap(e.adres)}</span>
+          <button type="button" class="kopieerknop" data-kopieer="${ontsnap(e.adres)}"
+            title="Adres kopiëren" aria-label="Adres kopiëren">${icoon('kopieer', 13)}</button>
+        </p>` : ''}
         ${reis}
         <div class="pop-knoppen">${knoppen.join('')}</div>
-      </div>` : ''}
+      </div>
     </div>`;
 }
 
@@ -1162,6 +1169,40 @@ function koppelBediening() {
     $('#type').value = filters.type;
     naFilter();
   }
+
+  /* Het adres kopiëren. Op documentniveau afgevangen, want de knop zit in
+     een popup die telkens opnieuw wordt opgebouwd. */
+  document.addEventListener('click', async (ev) => {
+    const knop = ev.target.closest('.kopieerknop');
+    if (!knop) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const gelukt = () => {
+      knop.classList.add('is-gelukt');
+      knop.title = 'Gekopieerd';
+      setTimeout(() => {
+        knop.classList.remove('is-gelukt');
+        knop.title = 'Adres kopiëren';
+      }, 1600);
+    };
+
+    try {
+      await navigator.clipboard.writeText(knop.dataset.kopieer);
+      gelukt();
+      return;
+    } catch { /* geweigerd of niet beschikbaar; hieronder de terugval */ }
+
+    // De nieuwe klembord-API wordt niet overal toegestaan. Dan de tekst
+    // selecteren en de oude methode proberen — die werkt vaak wél. Lukt ook
+    // dat niet, dan staat de tekst in elk geval geselecteerd en kun je hem
+    // zelf kopiëren.
+    const tekst = knop.closest('.pop-adres')?.querySelector('.pop-adres-tekst');
+    if (!tekst) return;
+    getSelection()?.selectAllChildren(tekst);
+    try {
+      if (document.execCommand('copy')) gelukt();
+    } catch { /* dan blijft de selectie staan */ }
+  }, true);
 
   // Tags staan in de lijst, in de popups op de kaart en in de legenda, dus
   // vangen we ze op documentniveau af — vóór de klik op het kaartje zelf.

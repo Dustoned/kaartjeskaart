@@ -791,7 +791,7 @@ a { color: inherit; }
 }
 .pop-beeld img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.pop-lijf { padding: 14px 16px 4px; }
+.pop-lijf { padding: 13px 15px 2px; }
 
 .pop-datum {
   display: flex;
@@ -807,26 +807,28 @@ a { color: inherit; }
 .pop-wanneer { text-transform: none; letter-spacing: 0; font-weight: 400; }
 
 .pop-naam {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -.015em;
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   color: var(--tekst);
 }
 
-.pop-plaats {
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--tekst-zacht);
-}
-.pop-zaal::before { content: " · "; }
 
 /* De openingstijd is waarvoor je dit kaartje opent, dus die krijgt de meeste
    ruimte van allemaal. Grote cijfers in vaste breedte, zodat 10:00 en 11:00
    onder elkaar uitlijnen als je door de spelden klikt. */
-.pop-tijd { margin-top: 13px; }
+/* De duur staat náást de tijd in plaats van eronder: rechts van "11:00 –
+   17:00" was het toch leeg, en zo scheelt het een regel. Uitgelijnd op de
+   onderkant van de cijfers, anders zweeft het kleine bijschrift halverwege. */
+.pop-tijd {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 11px;
+}
 .pop-tijd-groot {
   display: block;
   font-size: 25px;
@@ -842,9 +844,8 @@ a { color: inherit; }
   margin: 0 .18em;
 }
 .pop-tijd-bij {
-  display: block;
-  margin-top: 3px;
   font-size: 12px;
+  line-height: 1.4;
   color: var(--tekst-zacht);
 }
 
@@ -854,7 +855,7 @@ a { color: inherit; }
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 13px;
   color: var(--tekst);
 }
@@ -866,7 +867,7 @@ a { color: inherit; }
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: 14px;
+  margin-top: 11px;
 }
 
 .etiket {
@@ -931,12 +932,12 @@ a { color: inherit; }
    de knoppen in de weg, en die horen het laatste te zijn. */
 .pop-socials {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: nowrap;
-  margin-top: 9px;
+  margin-top: 8px;
 }
 
-.pop-tekst { margin-top: 12px; }
+.pop-tekst { margin-top: 10px; }
 .pop-tekst summary {
   display: inline-flex;
   align-items: center;
@@ -964,13 +965,45 @@ a { color: inherit; }
 /* De voet is door één lijn van de rest gescheiden, niet door een eigen
    achtergrond. */
 .pop-voet {
-  margin-top: 14px;
-  padding: 12px 16px 14px;
+  margin-top: 12px;
+  padding: 11px 15px 13px;
   border-top: 1px solid var(--rand);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
+
+/* Eén nette adresregel die je kunt kopiëren. Stond eerst als "plaats · zaal"
+   onder de titel, waar hij alleen ruimte kostte; hier onderaan staat hij
+   naast de rijtijd, precies waar je hem nodig hebt als je op weg gaat. */
+.pop-adres {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--tekst);
+}
+.pop-adres .ic { color: var(--tekst-zacht); margin-top: 1px; }
+.pop-adres-tekst { flex: 1 1 auto; min-width: 0; }
+
+.kopieerknop {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  margin: -3px -4px 0 0;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: none;
+  color: var(--tekst-flauw);
+  cursor: pointer;
+}
+.kopieerknop:hover { color: var(--tekst); background: var(--vlak-hoog); }
+.kopieerknop .ic { margin: 0; }
+/* Even bevestigen dat het gelukt is, anders weet je niet of er iets gebeurde. */
+.kopieerknop.is-gelukt { color: var(--soort-3); }
+.kopieerknop.is-gelukt .ic { stroke-width: 2.6; }
 
 .pop-reis {
   display: flex;

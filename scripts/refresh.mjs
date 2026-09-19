@@ -91,6 +91,10 @@ const verrijkt = events.map((e) => {
     lon: loc?.lon ?? null,
     land: loc?.land ?? null,
     precisie: loc?.precisie ?? null,
+    // Eén regel die je kunt kopiëren en ergens plakken. Kennen we het
+    // straatadres, dan staat dat erbij; zo niet, dan is de plaatsnaam het
+    // beste wat we hebben — nog altijd genoeg voor een navigatie-app.
+    adres: [e.zaal, loc?.adres ?? e.stad].filter(Boolean).join(', ') || null,
   };
 });
 

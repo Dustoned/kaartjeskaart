@@ -684,6 +684,10 @@ a { color: inherit; }
 
 /* ---------- kaartspelden ---------- */
 
+/* Het aanraakvlak is groter dan het bolletje; hier wordt het bolletje in
+   het midden gezet. */
+.speld-wrap { display: grid; place-items: center; }
+
 .speld {
   width: 15px; height: 15px;
   border-radius: 50%;

@@ -320,7 +320,7 @@ function maakKaart() {
   });
   kaart.addLayer(clusters);
 
-  kaart.on('moveend', () => { if (filters.inBeeld) tekenLijst(); });
+  kaart.on('moveend', () => { if (filters.inBeeld) lijstMisschienOpnieuw(); });
   kaart.on('popupclose', () => { zetGekozen(null, false); });
 }
 
@@ -512,8 +512,11 @@ function maakSpeld(e) {
     icon: L.divIcon({
       className: 'speld-wrap',
       html: `<div class="speld${e.geannuleerd ? ' speld-af' : ''}" style="--kleur:${kleurVan(niveau)}"></div>`,
-      iconSize: [15, 15],
-      iconAnchor: [7.5, 7.5],
+      // Het bolletje blijft 15 pixels, maar het aanraakvlak eromheen is 32:
+      // een speld van 15 pixels raak je met een vinger nauwelijks. De rand
+      // eromheen is doorzichtig, dus je ziet er niets van.
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
     }),
     title: `${e.naam} — ${e.stad}`,
   });
@@ -600,14 +603,58 @@ function tekenSpelden() {
   clusters.addLayers(laag);
 }
 
+/**
+ * Welke beurzen staan er nu in de lijst? Wordt gebruikt om te bepalen of
+ * hertekenen überhaupt nodig is.
+ */
+function lijstRijen() {
+  if (!filters.inBeeld || !kaart) return zichtbaar;
+  const kader = kaart.getBounds();
+  return zichtbaar.filter((e) => kader.contains([e.lat, e.lon]));
+}
+
+/**
+ * De lijst opnieuw opbouwen na een kaartbeweging — maar alleen als er echt
+ * iets veranderd is.
+ *
+ * Bij "alleen in beeld" hing dit aan elke beweging, en dat kost bij een
+ * volle lijst zo'n twintig milliseconde op een snelle machine en het
+ * veelvoud daarvan op een telefoon. Terwijl je bij het rondkijken meestal
+ * precies dezelfde beurzen in beeld houdt. Nu vergelijken we eerst welke
+ * beurzen er staan, en slaan we het hertekenen over als dat niet verschilt.
+ */
+let lijstVingerafdruk = null;
+let lijstGepland = null;
+
+function lijstMisschienOpnieuw() {
+  const rijen = lijstRijen();
+  // Het aantal op de lijstknop kost niets en hoort direct te kloppen, ook
+  // als het opbouwen zelf nog even wacht.
+  $('#mobielTelling').textContent = rijen.length ? `(${rijen.length})` : '';
+
+  const afdruk = rijen.map((e) => e.id).join();
+  if (afdruk === lijstVingerafdruk) return;
+
+  // Wél veranderd, maar het hoeft niet in dezelfde tel als de beweging.
+  // Het opbouwen van tweehonderd kaartjes kost een paar honderd DOM-knopen
+  // en dat is genoeg om een beeldje te laten vallen. Door het naar een
+  // rustig moment te verschuiven blijft de kaart soepel en loopt de lijst
+  // een fractie later bij — wat je niet ziet, want je kijkt naar de kaart.
+  if (lijstGepland !== null) {
+    (window.cancelIdleCallback ?? clearTimeout)(lijstGepland);
+  }
+  const plan = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 120));
+  lijstGepland = plan(() => {
+    lijstGepland = null;
+    tekenLijst();
+  }, { timeout: 400 });
+}
+
 function tekenLijst() {
   const lijst = $('#lijst');
 
-  let rijen = zichtbaar;
-  if (filters.inBeeld && kaart) {
-    const kader = kaart.getBounds();
-    rijen = rijen.filter((e) => kader.contains([e.lat, e.lon]));
-  }
+  const rijen = lijstRijen();
+  lijstVingerafdruk = rijen.map((e) => e.id).join();
 
   // Het aantal staat op de knop waarmee je naar de lijst wisselt, dus dat
   // moet ook kloppen als de lijst zelf niet in beeld staat.

@@ -13,6 +13,11 @@ const NAAMSVERMELDING =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bijdragers';
 const TEGEL_MAXZOOM = 16;
 
+/* Vanaf dit zoomniveau clustert er niets meer: elke speld staat er los op
+   de kaart. Zowel de clusterlaag als het springen naar een beurs rekenen
+   daarmee, dus staat het getal hier één keer. */
+const LOSSE_SPELDEN_ZOOM = 13;
+
 const DAG_MS = 86400000;
 const WEEKDAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
 const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
@@ -254,13 +259,19 @@ function maakKaart() {
     maxBoundsViscosity: 1,
     worldCopyJump: false,
 
-    /* Knijpzoomen laat de kaart vloeiend meeschalen, maar standaard springt
-       hij bij het loslaten naar het dichtstbijzijnde hele zoomniveau. Met
-       `zoomSnap: 0` blijft hij staan waar je hem loslaat. De knoppen en het
-       scrollwiel stappen wél met hele niveaus, via `zoomDelta`.
+    /* Knijpzoomen schaalt tijdens het gebaar vloeiend mee en zakt bij het
+       loslaten terug naar een heel zoomniveau.
+
+       Dat laatste moet ook zo blijven. Met `zoomSnap: 0` bleef de kaart staan
+       op 12,495 — en daar kan de clusterlaag niet tegen. Die bouwt één boom
+       per heel zoomniveau en zoekt het huidige niveau op als sleutel; bij een
+       gebroken getal komt daar niets uit. Het gevolg was dat alle spelden van
+       de kaart verdwenen, met een handvol fouten in de console. Een gebaar dat
+       precies uitloopt weegt daar niet tegenop.
+
        `bounceAtZoomLimits` uit: bij de grens stopt hij, in plaats van terug
        te stuiteren. */
-    zoomSnap: 0,
+    zoomSnap: 1,
     zoomDelta: 1,
     bounceAtZoomLimits: false,
     // Standaard is 60, waardoor één muiswielstapje al een heel niveau springt.
@@ -294,7 +305,7 @@ function maakKaart() {
     maxClusterRadius: 44,
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
-    disableClusteringAtZoom: 13,
+    disableClusteringAtZoom: LOSSE_SPELDEN_ZOOM,
     chunkedLoading: true,
     iconCreateFunction(cluster) {
       const kinderen = cluster.getAllChildMarkers();
@@ -321,6 +332,8 @@ function maakKaart() {
   kaart.addLayer(clusters);
 
   kaart.on('moveend', () => { if (filters.inBeeld) lijstMisschienOpnieuw(); });
+  kaart.on('resize', ververPopupHoogte);
+  ververPopupHoogte();
   kaart.on('popupclose', () => { zetGekozen(null, false); });
 }
 
@@ -390,6 +403,23 @@ const merkLogo = (platform) => {
 function voorzieningHtml(aan, label, naam) {
   if (aan === null || aan === undefined) return '';
   return `<span class="etiket${aan ? '' : ' is-niet'}">${icoon(naam, 12)}${ontsnap(label)}</span>`;
+}
+
+/**
+ * Begrenst de hoogte van een beurskaartje op wat er in het kaartvlak past.
+ *
+ * Stond eerst op 70% van de vensterhoogte, maar de kaart is kleiner dan het
+ * venster: er gaan een kop, een filterbalk en op een telefoon een knoppenbalk
+ * vanaf. Een kaartje kon daardoor bijna net zo hoog worden als de kaart zelf.
+ * Leaflet gaat dan flink schuiven om het passend te krijgen — dat voelt als
+ * te agressief centreren — en lukt dat niet, dan haalt de clusterlaag de
+ * speld buiten beeld weg en sluit het kaartje uit zichzelf.
+ */
+function ververPopupHoogte() {
+  if (!kaart) return;
+  // Ruimte laten voor het pijltje, de randen en wat lucht om te kunnen pannen.
+  const hoogte = Math.max(200, Math.round(kaart.getSize().y - 130));
+  document.documentElement.style.setProperty('--popup-max', `${hoogte}px`);
 }
 
 function popupHtml(e) {
@@ -477,9 +507,8 @@ function popupHtml(e) {
 
   return `
     <div class="pop" style="--kleur:${kleur}">
-      ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt=""></div>` : ''}
-
       <div class="pop-lijf">
+        ${afbeelding ? `<div class="pop-beeld"><img src="${ontsnap(afbeelding)}?w=640" alt=""></div>` : ''}
         <div class="pop-datum">${ontsnap(datumLabel(e.datum))}<span class="pop-wanneer">${ontsnap(relatief(dagen))}</span></div>
         <h2 class="pop-naam">${ontsnap(e.naam)}</h2>
         ${socials ? `<div class="pop-socials">${socials}</div>` : ''}
@@ -520,7 +549,7 @@ function maakSpeld(e) {
     }),
     title: `${e.naam} — ${e.stad}`,
   });
-  marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPanPadding: [24, 24] });
+  marker.bindPopup(() => popupHtml(e), { maxWidth: 270, minWidth: 246, autoPanPadding: [14, 14] });
   marker.on('popupopen', async (ev) => {
     zetGekozen(e.id, true);
     const el = ev.popup.getElement();
@@ -529,6 +558,17 @@ function maakSpeld(e) {
     // dan een grijze strook bovenaan het kaartje.
     const img = el?.querySelector('.pop-beeld img');
     img?.addEventListener('error', () => img.closest('.pop-beeld')?.remove(), { once: true });
+
+    /* Past het kaartje niet in één keer, dan begint het onder de banner.
+       Anders open je op een plaatje terwijl je de datum, de tijd en het
+       adres wilt zien; de banner is dan het minst belangrijke wat er staat.
+       Past alles wél, dan blijft de banner gewoon in beeld — er valt dan
+       toch niets te schuiven. */
+    requestAnimationFrame(() => {
+      const lijf = el?.querySelector('.pop-lijf');
+      const beeld = lijf?.querySelector('.pop-beeld');
+      if (lijf && beeld) lijf.scrollTop = beeld.offsetHeight;
+    });
 
     // De echte rijtijd opvragen en over de schatting heen zetten. Lukt het
     // niet, dan blijft de schatting staan.
@@ -888,15 +928,54 @@ function zetGekozen(id, vanuitKaart) {
   }
 }
 
+/**
+ * Klapt de popup van een speld open zodra die werkelijk op de kaart staat.
+ *
+ * Na een zoom heeft de clusterlaag even nodig om de speld uit zijn cluster te
+ * halen, en met `chunkedLoading` worden spelden sowieso in porties toegevoegd.
+ * Zolang een speld nergens bij hoort, struikelt `openPopup()` over een
+ * ontbrekende kaart — dus kijken we een seconde lang of hij er al is.
+ *
+ * Lukt het dan nog niet, dan vragen we het de clusterlaag, maar alleen als die
+ * de speld inmiddels kent: zonder `__parent` loopt `zoomToShowLayer` stuk. Is
+ * ook dat er niet, dan laten we het erbij. De kaart staat op dat moment al op
+ * de goede plek, dus je ziet nog steeds waar de beurs is.
+ */
+function openSpeld(marker, poging = 0) {
+  if (marker.isPopupOpen()) return;
+  if (kaart.hasLayer(marker)) { marker.openPopup(); return; }
+  if (poging < 14) { setTimeout(() => openSpeld(marker, poging + 1), 70); return; }
+  if (marker.__parent) clusters.zoomToShowLayer(marker, () => marker.openPopup());
+}
+
 function springNaar(id) {
   const marker = spelden.get(id);
   if (!marker) return;
   zetGekozen(id, false);
   if (window.matchMedia('(max-width: 860px)').matches) zetWeergave('kaart');
+
   // Even wachten zodat de kaart zijn nieuwe afmeting kent na een weergavewissel.
   requestAnimationFrame(() => {
     kaart.invalidateSize();
-    clusters.zoomToShowLayer(marker, () => marker.openPopup());
+
+    /* Staat de speld al los op de kaart en ruim in beeld, dan hoeft er
+       niets te bewegen: gewoon openklappen. Eerder ging hier altijd
+       `zoomToShowLayer` overheen, en dat zoomt en schuift ook als het
+       nergens voor nodig is — dat voelde als te agressief centreren. */
+    const staatErAl = kaart.hasLayer(marker);
+    const ruimInBeeld = staatErAl && kaart.getBounds().pad(-0.18).contains(marker.getLatLng());
+    if (ruimInBeeld) { marker.openPopup(); return; }
+
+    /* Anders zelf naar de speld toe. Dit deed `zoomToShowLayer`, maar die
+       rekent uit óf er bewogen moet worden en doet niets zodra de kaart al
+       goed genoeg staat — en dan blijft de popup dicht. Vanaf zoom 11 gebeurde
+       er zo regelmatig helemaal niets als je een beurs verderop aantikte.
+
+       Voorbij `LOSSE_SPELDEN_ZOOM` clustert er niets meer, dus na deze sprong
+       staat de speld zeker los en kan de popup zonder omwegen open. Zat je al
+       dichterbij, dan blijft dat zoomniveau staan: geen onnodige sprong. */
+    kaart.once('moveend', () => setTimeout(() => openSpeld(marker), 0));
+    kaart.setView(marker.getLatLng(), Math.max(kaart.getZoom(), LOSSE_SPELDEN_ZOOM));
   });
 }
 
